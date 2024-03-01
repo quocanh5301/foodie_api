@@ -1,6 +1,6 @@
 const firebase = require('../utils/firebase');
 const { v4: uuidv4 } = require('uuid');
-const db = require('../data/database/db');
+const db = require('../data/db');
 const e = require('express');
 
 const bucket = firebase.firebaseAdmin.storage().bucket()
@@ -51,11 +51,18 @@ async function setProfileImage(req, res) {
 
 async function getProfileImage(req, res) {
     try {
-        const imageData = await getImageFromStorage(req.query.imageId);
+        const file = bucket.file(req.query.imageId);
+        const fileUrl = await file.getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 1000 * 60 * 10,
+        });
+        console.log('File url ' + fileUrl);//!qa test
 
-        const base64Data = imageData.toString('base64'); // Encode binary data to Base64
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).json({ data: base64Data, code: 200 });
+        // const imageData = await getImageFromStorage(req.query.imageId);
+
+        // const base64Data = imageData.toString('base64'); // Encode binary data to Base64
+        // res.setHeader('Content-Type', 'application/json');
+        // res.status(200).json({ data: base64Data, code: 200 });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -92,10 +99,10 @@ async function updateProfileImage(req, res, next) {
         if (existingImageID) {
             await bucket.file(existingImageID).delete().then(() => {
                 console.log('File deleted successfully.');
-              })
-              .catch((error) => {
-                console.error('Error deleting file:', error);
-              });;
+            })
+                .catch((error) => {
+                    console.error('Error deleting file:', error);
+                });;
         }
 
         // Upload the new image with the same image ID
@@ -107,7 +114,7 @@ async function updateProfileImage(req, res, next) {
                 contentType: file.mimetype,
             },
         });
- 
+
         stream.on('error', (err) => {
             console.error('Error uploading to Firebase Storage:', err);
             res.status(500).json({ error: 'Error uploading to Firebase Storage' });

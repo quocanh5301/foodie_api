@@ -16,7 +16,7 @@ create table if not exists account (
   user_email varchar (100) not null,
   user_password varchar (150) not null,
   join_since date not null,
-  image varchar(1000)
+  image varchar(500)
 );
 
 create table if not exists register_account (

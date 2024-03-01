@@ -1,4 +1,4 @@
-exports.currentDateDMY = () => {
+function currentDateDMY() {
     let today = new Date();
 
     let dd = today.getDate();
@@ -15,4 +15,10 @@ exports.currentDateDMY = () => {
     today = yyyy + '/' + mm + '/' + dd;
 
     return today;
+}
+
+module.exports = {
+    currentDateDMY : currentDateDMY, 
+    // confirmEmail : confirmEmail
+    //!qa
 }

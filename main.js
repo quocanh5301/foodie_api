@@ -16,7 +16,7 @@ const userRoutes = require('./routes/user');
 const registerRoutes = require('./routes/register');
 const authenticateRoutes = require('./routes/authenticate');
 
-app.use('/manganime', authenticateToken, manganimeRoutes);
+// app.use('/manganime', authenticateToken, manganimeRoutes);
 
 app.use('/user', 
 // authenticateToken,

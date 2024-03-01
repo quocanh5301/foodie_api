@@ -1,4 +1,4 @@
-const db = require('../data/database/db');
+const db = require('../data/db');
 const jwtHelper = require('../utils/jwt_helper');
 const firebase = require('../utils/firebase');
 

@@ -1,4 +1,4 @@
-const db = require('../data/database/db'); 
+const db = require('../data/db'); 
 const mailer = require('../utils/nodemailer_helper'); 
 const dateTime = require('../utils/date_time'); 
 const bcrypt = require('bcrypt');

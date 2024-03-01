@@ -11,7 +11,7 @@ router.get("/retrieveImage", userController.getProfileImage);
 
 router.post("/updateImage", upload.single('file'), userController.updateProfileImage);
 
-router.post("/uploadImage", upload.single('file'), userController.setProfileImage);
+router.post("/uploadImage", upload.single('image'), userController.setProfileImage);
 
 router.post("/updateUserData", userController.updateUserData);
 
