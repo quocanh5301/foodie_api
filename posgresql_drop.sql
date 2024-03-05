@@ -4,6 +4,8 @@ DROP TABLE IF EXISTS firebase_messaging_token;
 
 DROP TABLE IF EXISTS account;
 
+DROP TABLE IF EXISTS account_login_status;
+
 DROP TABLE IF EXISTS recipe;
 
 DROP TABLE IF EXISTS ingredient;

@@ -13,7 +13,7 @@ create table if not exists firebase_messaging_token (
 
 create table if not exists account_login_status (
   user_email varchar (100) not null,
-  session_token varchar (100) not null,
+  session_token varchar (500) not null,
   constraint unique_login unique (user_email, session_token)
 );
 
@@ -31,7 +31,8 @@ create table if not exists recipe (
   id serial not null,
   account_id int not null,
   recipe_name varchar (50) not null,
-  description text not null,
+  description text,
+  instruction text,
   rating float not null,
   follower int not null,
   num_of_rating int not null,

@@ -2,6 +2,7 @@ const firebase = require('../utils/firebase');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../data/db');
 const e = require('express');
+const bcrypt = require('bcrypt');
 
 async function setProfileImage(req, res) {
     try {
@@ -133,8 +134,7 @@ async function updateProfileImage(req, res, next) {
             },
         });
     } catch (error) {
-        console.log(error);
-        res.status(401).json({ mess: error.message, code: 401 });
+        res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -154,12 +154,20 @@ async function updateUserData(req, res) {
 async function changeUserPassword(req, res) {
     try {
         const userId = req.body.userId;
-        const userPassword = req.body.userPassword;
+        const oldPassword = req.body.oldPassword;
+        const newPassword = req.body.newPassword;
+
+        const userQuery = "SELECT user_password FROM account WHERE id = $1";
+        const userResult = await db.query(userQuery, [userId]);
+        const validPassword = await bcrypt.compare(oldPassword, userResult[0].user_password);
+        if (!validPassword) return res.status(401).json({ mess: "Incorrect old password", code: 401 });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         const updateUserQuery = "UPDATE account SET user_password = $1 WHERE id = $2";
-        await db.query(updateUserQuery, [userPassword, userId]);
+        await db.query(updateUserQuery, [hashedPassword, userId]);
         res.status(200).json({ mess: "success", code: 200 });
     } catch (error) {
-        res.status(500).json({ mess: 'Error updating user password', code: 500 });
+        res.status(500).json({ mess: 'Error updating user password' + error, code: 500 });
     }
 }
 

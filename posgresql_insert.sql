@@ -10,18 +10,19 @@ VALUES
   ('Michael Wilson', 'michael@example.com', 'password654', '2024-03-04', '2024-03-04');
 
 -- Insert data into the recipe table
-INSERT INTO recipe (account_id, recipe_name, description, rating, follower, num_of_rating, num_of_comments, update_at, create_at) 
+INSERT INTO recipe (account_id, recipe_name, description, instruction, rating, follower, num_of_rating, num_of_comments, update_at, create_at) 
 VALUES 
-  (1, 'Pancakes', 'Delicious pancakes recipe', 0, 0, 0, 0, '2024-03-04', '2024-01-01'),
-  (1, 'Scrambled Eggs', 'Quick and easy scrambled eggs recipe', 0, 0, 0, 0, '2024-03-03', '2024-01-02'),
-  (2, 'Chocolate Cake', 'Decadent chocolate cake recipe', 0, 0, 0, 0, '2024-03-04', '2024-01-02'),
-   (1, 'Spaghetti Carbonara', 'Classic pasta dish with bacon and cheese', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (2, 'Chicken Curry', 'Spicy chicken curry with rice', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (3, 'Vanilla Cake', 'Yummy Vanilla cake recipe', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (4, 'Grilled Salmon', 'Healthy grilled salmon with vegetables', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (4, 'Caesar Salad', 'Classic Caesar salad with homemade dressing', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (5, 'Vegetable Stir-Fry', 'Quick and easy vegetable stir-fry', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (5, 'Margarita Pizza', 'Classic margarita pizza with fresh basil', 0, 0, 0, 0,'2024-03-04', '2024-03-04');
+  (1, 'Pancakes', 'Delicious pancakes recipe', 'Add flour, milk, eggs, and sugar. Mix well and cook on a hot griddle until golden brown on both sides.', 0, 0, 0, 0, '2024-03-04', '2024-01-01'),
+  (1, 'Scrambled Eggs', 'Quick and easy scrambled eggs recipe', 'Crack eggs into a bowl, whisk, and cook in a pan with butter until fluffy.', 0, 0, 0, 0, '2024-03-03', '2024-01-02'),
+  (2, 'Chocolate Cake', 'Decadent chocolate cake recipe', 'Mix flour, cocoa powder, sugar, and eggs. Bake in the oven until cooked through.', 0, 0, 0, 0, '2024-03-04', '2024-01-02'),
+  (1, 'Spaghetti Carbonara', 'Classic pasta dish with bacon and cheese', 'Cook spaghetti according to package instructions. In a separate pan, fry bacon until crispy. Mix cooked spaghetti with beaten eggs, grated cheese, and bacon. Serve hot.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (2, 'Chicken Curry', 'Spicy chicken curry with rice', 'Marinate chicken with spices and yogurt. Cook in a pan with onions, tomatoes, and curry paste. Serve with rice.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (3, 'Vanilla Cake', 'Yummy Vanilla cake recipe', 'Cream butter and sugar. Add eggs and vanilla extract. Fold in flour and bake in a preheated oven.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (4, 'Grilled Salmon', 'Healthy grilled salmon with vegetables', 'Season salmon fillets with salt and pepper. Grill until cooked through. Serve with roasted vegetables.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (4, 'Caesar Salad', 'Classic Caesar salad with homemade dressing', 'Toss chopped lettuce with Caesar dressing, croutons, and grated Parmesan cheese.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (5, 'Vegetable Stir-Fry', 'Quick and easy vegetable stir-fry', 'Stir-fry mixed vegetables in a hot pan with garlic, ginger, and soy sauce. Serve over rice.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (5, 'Margarita Pizza', 'Classic margarita pizza with fresh basil', 'Spread tomato sauce on pizza dough, add sliced mozzarella and fresh basil leaves. Bake in a hot oven until crust is crispy.', 0, 0, 0, 0,'2024-03-04', '2024-03-04');
+
  
  
  
