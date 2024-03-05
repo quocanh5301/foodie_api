@@ -111,3 +111,7 @@ after insert or update
 on recipe_account_comment
 for each row
 execute procedure check_comment_validation();
+
+--
+CREATE EVENT `et_update_your_trigger_name`  ON SCHEDULE EVERY 1 MINUTE 
+STARTS '2010-01-01 00:00:00' 

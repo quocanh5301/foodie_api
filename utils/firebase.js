@@ -34,6 +34,8 @@ const uploadFile = async ({file, fileName, onSuccess, onFail}) => {
       },
   });
 
+  console.log('Uploading file ' + fileUpload.name);
+
   stream.on('error', onFail);
 
   stream.on('finish', onSuccess);

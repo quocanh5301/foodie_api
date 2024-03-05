@@ -19,11 +19,11 @@ const authenticateRoutes = require('./routes/authenticate');
 // app.use('/manganime', authenticateToken, manganimeRoutes);
 
 app.use('/user', 
-// authenticateToken,
+authenticateToken,
  userRoutes);
 
  app.use('/recipe', 
-// authenticateToken,
+authenticateToken,
  recipeRoutes);
 
 app.use('/register', registerRoutes);
@@ -33,9 +33,9 @@ app.listen(3000);
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']; //Bearer TOKEN
-    const token = authHeader && authHeader.split(' ')[1];
-    if (token == null) return res.status(401).json({mess:"Null token", code: 401});
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
+    const accessToken = authHeader && authHeader.split(' ')[1];
+    if (accessToken == null) return res.status(401).json({mess:"Null token", code: 401});
+    jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (error, user) => {
       if (error) return res.status(403).json({mess : error.message, code: 403});
       req.user = user;
       next();

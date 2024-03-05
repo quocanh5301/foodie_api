@@ -1,3 +1,3 @@
 node_modules
 .env
-posgresql_script.sql
+nodemailer_helper.js

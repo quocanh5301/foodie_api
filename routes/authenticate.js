@@ -4,6 +4,6 @@ const router = express.Router();
 
 router.post("/login", authenticateController.logIn);
 router.get("/refreshToken", authenticateController.refreshToken);
-// router.get("/logout", authenticateController.);
+router.get("/logout", authenticateController.logOut);
 
 module.exports = router;

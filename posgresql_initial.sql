@@ -11,6 +11,12 @@ create table if not exists firebase_messaging_token (
   constraint pk_firebase_token_account_id primary key (firebase_token, account_id)
 );
 
+create table if not exists account_login_status (
+  user_email varchar (100) not null,
+  session_token varchar (100) not null,
+  constraint unique_login unique (user_email, session_token)
+);
+
 create table if not exists account (
   id serial primary key,
   user_name varchar (50) not null,

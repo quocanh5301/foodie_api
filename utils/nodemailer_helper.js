@@ -5,12 +5,12 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'quanhphan5301@gmail.com', // replace with your Gmail email address
-    pass: 'xini drlv pklz ypzs',    // replace with your Gmail app password
+    pass: 'esds zjlq pauy iaux',    // replace with your Gmail app password
   },
 });
 
 // Function to send a verification email
-const sendVerificationEmail = (email, verificationLink) => {
+const sendVerificationEmail = async (email, verificationLink) => {
   const mailOptions = {
     from: 'quanhphan5301@gmail.com',
     to: email,
@@ -21,11 +21,11 @@ const sendVerificationEmail = (email, verificationLink) => {
     `,
   };
 
-  return transporter.sendMail(mailOptions);
+  return await transporter.sendMail(mailOptions);
 };
 
-exports.sendVerificationEmail = (email, verificationLink) => {
-    sendVerificationEmail(email, verificationLink)
+exports.sendVerificationEmail = async (email, verificationLink) => {
+    await sendVerificationEmail(email, verificationLink)
     .then(() => {
       console.log('Verification email sent successfully.');
     })

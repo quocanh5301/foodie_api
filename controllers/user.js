@@ -5,11 +5,11 @@ const e = require('express');
 
 async function setProfileImage(req, res) {
     try {
-        const email = req.body.email;
+        const userId = req.body.userId;
         const file = req.file;
 
         console.log('Received body:', req.body);
-        console.log('Received Parameters:', email);
+        console.log('Received Parameters:', userId);
         console.log('Received File:', file);
 
         const imageID = uuidv4();
@@ -19,8 +19,9 @@ async function setProfileImage(req, res) {
             fileName: fileName,
             onSuccess: async () => {
                 try {
-                    const queryStr = "UPDATE account SET image = $1 WHERE user_email = $2"
-                    await db.query(queryStr, [fileName, email]);
+                    
+                    const queryStr = "UPDATE account SET image = $1 WHERE id = $2"
+                    await db.query(queryStr, [fileName, userId]);
                 } catch (error) {
                     console.log('File fail to uploaded to Firebase Storage' + error);
                 }
@@ -74,7 +75,11 @@ async function registerUserDeviceToken(req, res) {
 
 async function getProfileImage(req, res) {
     try {
-        const fileUrl = await firebase.getImageUrl(req.query.imageId);
+        const userId = req.body.userId;
+        const userQuery = "SELECT image FROM account WHERE id = $1";
+        const userResult = await db.query(userQuery, [userId]);
+        const fileUrl = await firebase.getImageUrl(userResult[0].image);
+        // const fileUrl = await firebase.getImageUrl(req.query.imageId);
         console.log('File url ' + fileUrl);
         res.setHeader('Content-Type', 'application/json');
         res.status(200).json({ mess: "success", data: fileUrl, code: 200 });
@@ -85,17 +90,15 @@ async function getProfileImage(req, res) {
 
 async function updateProfileImage(req, res, next) {
     try {
-        const imageId = req.body.imageId;
         const file = req.file;
-        const email = req.body.email;
+        const userId = req.body.userId;
 
         if (imageId === null) {
             next()
         }
 
-        const userQuery = "SELECT image FROM account WHERE user_email = $1";
-        const userResult = await db.query(userQuery, [email]);
-        console.log(userResult[0].image);
+        const userQuery = "SELECT image FROM account WHERE id = $1";
+        const userResult = await db.query(userQuery, [userId]);
         const existingImageID = userResult[0].image;
 
         //Delete the existing image from Firebase Storage
@@ -110,12 +113,12 @@ async function updateProfileImage(req, res, next) {
         // Upload the new image with the same image ID
         await firebase.uploadFile({
             file: file,
-            fileName: `${existingImageID}`,
+            fileName: existingImageID,
             onSuccess: async () => {
                 try {
                     // Update the user's record in your database with the new image ID
-                    const queryStr = "UPDATE account SET image = $1 WHERE user_email = $2";
-                    await db.query(queryStr, [fileName, email]);
+                    const queryStr = "UPDATE account SET image = $1 WHERE id = $2";
+                    await db.query(queryStr, [existingImageID, userId]);
                 } catch (error) {
                     console.error('Error updating user record:', error);
                     res.status(500).json({ mess: 'Error updating user record', code: 500 });
@@ -140,12 +143,23 @@ async function updateUserData(req, res) {
         const userId = req.body.userId;
         const userName = req.body.userName;
         const userEmail = req.body.userEmail;
-        const userPassword = req.body.userPassword;
-        const updateUserQuery = "UPDATE account SET user_name = $1, user_email = $2, user_password = $3 WHERE id = $4";
-        await db.query(updateUserQuery, [userName, userEmail, userPassword, userId]);
+        const updateUserQuery = "UPDATE account SET user_name = $1, user_email = $2 WHERE id = $3";
+        await db.query(updateUserQuery, [userName, userEmail, userId]);
         res.status(200).json({ mess: "success", code: 200 });
     } catch (error) {
         res.status(500).json({ mess: 'Error updating user data', code: 500 });
+    }
+}
+
+async function changeUserPassword(req, res) {
+    try {
+        const userId = req.body.userId;
+        const userPassword = req.body.userPassword;
+        const updateUserQuery = "UPDATE account SET user_password = $1 WHERE id = $2";
+        await db.query(updateUserQuery, [userPassword, userId]);
+        res.status(200).json({ mess: "success", code: 200 });
+    } catch (error) {
+        res.status(500).json({ mess: 'Error updating user password', code: 500 });
     }
 }
 
@@ -159,6 +173,7 @@ module.exports = {
     updateProfileImage: updateProfileImage,
     updateUserData: updateUserData,
     retrieveUserData: retrieveUserData,
+    changeUserPassword: changeUserPassword,
     // sendNotificationToFollower: sendNotificationToFollower, //!qa
     registerUserDeviceToken: registerUserDeviceToken,
 }

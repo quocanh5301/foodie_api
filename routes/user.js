@@ -9,13 +9,14 @@ const upload = multer({ storage: storage });
 
 router.get("/retrieveImage", userController.getProfileImage);
 
-router.post("/updateImage", upload.single('file'), userController.updateProfileImage);
+router.post("/updateProfileImage", upload.single('file'), userController.updateProfileImage);
 
-router.post("/uploadImage", upload.single('image'), userController.setProfileImage);
+router.post("/setProfileImage", upload.single('image'), userController.setProfileImage);
 
 router.post("/updateUserData", userController.updateUserData);
 
+router.post("/changeUserPassword", userController.changeUserPassword);
+
 router.post("/retrieveUserData", userController.retrieveUserData);
-// router.get("/logout", authenticateController.);
 
 module.exports = router;

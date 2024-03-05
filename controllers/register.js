@@ -4,7 +4,7 @@ const dateTime = require('../utils/date_time');
 const bcrypt = require('bcrypt');
 const date_time = require('../utils/date_time');
 
-async function registerAccount(req, res, next){
+async function registerAccount(req, res){
     try {
         const queryStr = "select user_name from account where user_email = $1"
         const rows = await db.query(queryStr, [req.body.email]);
@@ -12,7 +12,7 @@ async function registerAccount(req, res, next){
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const queryStr2 = "insert into register_account (user_name, user_email, user_password) values ($1, $2, $3)"
         await db.query(queryStr2, [req.body.name, req.body.email, hashedPassword]);
-        mailer.sendVerificationEmail(req.body.email, "http://localhost:3000/register/confirmEmail?email=" + req.body.email);
+        await mailer.sendVerificationEmail(req.body.email, "http://localhost:3000/register/confirmRegistration?email=" + req.body.email);
         res.status(200).json({mess: "Check your email",  code : 200});
     } catch (error) {
         console.log(error)
@@ -36,7 +36,6 @@ async function confirmEmail(req, res){
     } catch (error) {
         res.status(401).json({mess: error + "\nPlease contact a@gmail.com to report",  code : 401});
     }
-    
 }
 
 module.exports = {
