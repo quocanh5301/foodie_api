@@ -17,6 +17,6 @@ router.post("/updateUserData", userController.updateUserData);
 
 router.post("/changeUserPassword", userController.changeUserPassword);
 
-router.post("/retrieveUserData", userController.retrieveUserData);
+router.post("/setFirebaseToken", userController.setFirebaseToken);
 
 module.exports = router;

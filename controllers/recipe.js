@@ -1,6 +1,7 @@
 const db = require('../data/db');
-const dateTime = require('../utils/date_time'); 
+const dateTime = require('../utils/date_time');
 const firebase = require('../utils/firebase');
+const { v4: uuidv4 } = require('uuid');
 
 async function getBookmarkList(req, res) {
     try {
@@ -18,7 +19,7 @@ async function getBookmarkList(req, res) {
             return { ...recipe, imageUrl: null };
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl});
+        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -32,10 +33,10 @@ async function getRecipeDetail(req, res) {
         const recipeDetail = await db.query("select * from recipe where id = $1", [recipeId]);
         if (recipeDetail[0].recipe_image !== null) {
             const imageUrl = await firebase.getImageUrl(recipeDetail[0].recipe_image);
-            return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: imageUrl[0], ingredients }});
+            return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: imageUrl[0], ingredients } });
         }
 
-        res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: null, ingredients }});
+        res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: null, ingredients } });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -57,7 +58,7 @@ async function getNewRecipe(req, res) {
             return { ...recipe, imageUrl: null };
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl});
+        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -79,7 +80,7 @@ async function getTopRecipe(req, res) {
             return { ...recipe, imageUrl: null };
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl});
+        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -102,7 +103,7 @@ async function getRecipeOfUser(req, res) {
             return { ...recipe, imageUrl: null };
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl});
+        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -121,24 +122,53 @@ async function createNewRecipe(req, res) {
         const fileName = imageID;
 
         const insertRecipeQuery = "insert into recipe (account_id, recipe_name, description, instruction, rating, follower, num_of_rating, num_of_comments, update_at, create_at, recipe_image) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
-        await db.query(insertRecipeQuery, [createdUserId, recipeName, recipeDescription, recipeInstruction, 0, 0, 0, 0, dateTime.currentDateDMY_HM(), dateTime.currentDateDMY_HM(), `test/${fileName}`]); //!qa test
+        await db.query(insertRecipeQuery, [createdUserId, recipeName, recipeDescription, recipeInstruction, 0, 0, 0, 0, dateTime.currentDateDMY_HM(), dateTime.currentDateDMY_HM(), `test/${fileName}`]); //test/ is the folder name in Firebase Storage
+
+        const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token join subscription_account on firebase_messaging_token.account_id = subscription_account.follower_account_id where subscription_account.account_id = $1";
+        const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [createdUserId]);
+        const firebaseTokens = getFirebaseTokenResult.map((item) => {
+            return item.firebase_token;
+        });
         
+        
+        const userQuery = "SELECT user_name FROM account WHERE id = $1";
+        const userResult = await db.query(userQuery, [createdUserId]);
+
+        //!qa test
+        // const insertRecipeQuery = "insert into recipe (account_id, recipe_name, description, instruction, rating, follower, num_of_rating, num_of_comments, update_at, create_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+        // await db.query(insertRecipeQuery, [createdUserId, recipeName, recipeDescription, recipeInstruction, 0, 0, 0, 0, dateTime.currentDateDMY_HM(), dateTime.currentDateDMY_HM()]); 
+        // console.log(firebaseTokens);
+        // await firebase.sendNotificationTo(
+        //     firebaseTokens,
+        //     "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+        //     "New recipe has been created",
+        // );
+        // res.status(200).json({ mess: "create new recipe success", code: 200 });
+        //!qa test
         await firebase.uploadFile({
             file: file,
             fileName: fileName,
-            onSuccess: () => {
-                console.log('File uploaded to Firebase Storage');
-                res.status(200).json({ mess: "success", code: 200});
+            onSuccess: async () => {
+                firebase.sendNotificationTo(
+                    firebaseTokens,
+                    "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                    "New recipe has been created",
+                );
+                res.status(200).json({ mess: "create new recipe success", code: 200 });
             },
             onFail: async (err) => {
                 try {
-                    const queryStr = "UPDATE recipe SET recipe_image = NULL WHERE recipe_image = $1"
-                    await db.query(queryStr, [fileName]);
-                    console.log('File fail to set recipe image name in Firebase Storage' + err);
+                    const queryStr = "delete from recipe WHERE recipe_image = $1 and account_id = $2"
+                    await db.query(queryStr, [imageID, createdUserId]);
+                    await firebase.sendNotificationTo({
+                        deviceTokenList: firebaseTokens,
+                        title: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                        body: "New recipe has been created",
+                    });
+                    res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
                 } catch (error) {
-                    console.log('File fail to reset recipe image name in Firebase Storage' + error);
+                    res.status(500).json({ mess: 'fail to insert recipe data, upload recipe image to firebase and removing wrong data' + err + 'and ' + error, code: 500 });
                 }
-                res.status(500).json({ mess: 'Error uploading to Firebase Storage ' + err, code: 500 });
             },
         });
     } catch (error) {
