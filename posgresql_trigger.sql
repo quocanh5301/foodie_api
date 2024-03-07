@@ -32,7 +32,7 @@ for each row
 execute procedure update_recipe_ratings();
 
 --create trigger to update recipe.num_of_rating when new row add to recipe_account_comment
-CREATE OR REPLACE FUNCTION update_recipe_comments() --!updatecomment size failllllllll
+CREATE OR REPLACE FUNCTION update_recipe_comments()
 RETURNS TRIGGER AS $$
 declare new_num_of_comments int;
 BEGIN
@@ -111,6 +111,36 @@ after insert or update
 on recipe_account_comment
 for each row
 execute procedure check_comment_validation();
+
+--increase recipe "follower" when a user save that recipe to their bookmark list
+
+CREATE OR REPLACE FUNCTION update_recipe_follower()
+RETURNS TRIGGER AS $$
+declare new_num_of_follower int;
+BEGIN
+    -- Calculate the total number of comments of the recipe
+    SELECT COUNT(*) INTO new_num_of_follower
+    FROM recipe_account_save
+    WHERE recipe_id = NEW.recipe_id;
+
+    -- Update the recipe table with the new values
+    UPDATE recipe
+    SET follower  = new_num_of_follower
+    WHERE id = NEW.recipe_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+drop trigger if exists update_follower on recipe_account_save;
+
+create trigger update_follower
+after insert or delete  
+on recipe_account_save
+for each row
+execute procedure update_recipe_follower();
+
+
 
 --
 CREATE EVENT `et_update_your_trigger_name`  ON SCHEDULE EVERY 1 MINUTE 

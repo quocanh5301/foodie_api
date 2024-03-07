@@ -17,8 +17,29 @@ function currentDateDMY() {
     return today;
 }
 
+function currentDateDMY_HM() {
+    let today = new Date();
+
+    let dd = today.getDate();
+    let mm = today.getMonth() + 1;
+    let yyyy = today.getFullYear();
+    let hh = today.getHours();
+    let min = today.getMinutes();
+    let sec = today.getSeconds();
+
+    if (dd < 10) {
+        dd = '0' + dd;
+    }
+    if (mm < 10) {
+        mm = '0' + mm;
+    }
+    today = yyyy + '/' + mm + '/' + dd + ' ' + hh + ':' + min + ':' + sec;
+
+    return today;
+}
+
 module.exports = {
     currentDateDMY : currentDateDMY, 
-    // confirmEmail : confirmEmail
+    currentDateDMY_HM : currentDateDMY_HM,
     //!qa
 }

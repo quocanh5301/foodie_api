@@ -4,6 +4,8 @@ const router = express.Router();
 
 router.get("/getUserBookmarkRecipe", recipeController.getBookmarkList);
 router.get("/getRecipeDetail", recipeController.getRecipeDetail)
-// router.post
+router.get("/getNewRecipe", recipeController.getNewRecipe)
+router.get("/getTopRecipe", recipeController.getTopRecipe)
+router.get("/getRecipeOfUser", recipeController.getRecipeOfUser)
 
 module.exports = router;

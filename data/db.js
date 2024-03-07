@@ -7,7 +7,7 @@ const pool = new Pool({
     user: 'quocanh',
     password: 'ti532001',
     max: 5,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 120000,
 });
 
 exports.query = async (textQuery, params) => {

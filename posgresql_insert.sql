@@ -26,16 +26,15 @@ VALUES
  
  
  
- -- Insert data into the recipe_account_rating table
+ -- Insert data into the recipe_account_rating table 7 recipe_id and 10 account_id
 INSERT INTO recipe_account_rating (recipe_id, account_id, rating) 
 VALUES 
-  (1, 1, 4),
-  (1, 2, 5),
-  (1, 3, 4),
-  (2, 1, 3),
-  (2, 2, 4),
-  (3, 1, 5),
-  (3, 2, 5);
+  (1, 1, 4),(2, 1, 3),(1, 1, 4),(2, 1, 1),  (1, 2, 5),(2, 2, 5),(1, 2, 5),(2, 2, 4),
+  (2, 3, 2),(3, 3, 2),(2, 3, 3),(3, 3, 4),  (2, 4, 3),(3, 4, 5),(2, 4, 4),(3, 4, 5),
+  (3, 5, 3),(4, 5, 5),(3, 5, 4),(4, 5, 4),  (3, 6, 3),(4, 6, 5),(3, 6, 4),(4, 6, 5),
+  (4, 7, 4),(5, 7, 4),(4, 7, 5),(5, 7, 4),  (4, 8, 2),(5, 8, 5),(4, 8, 4),(5, 8, 5),
+  (5, 9, 5),(6, 9, 1),(5, 9, 2),(6, 9, 3),  (5, 10, 5),(6, 10,45),(5, 10, 4),(6, 10, 5),
+  (6, 1, 2),(7, 4, 4),(6, 6, 3),(7, 7, 5),  (6, 8, 4),(7, 9, 5),(6, 10, 4),(7, 2, 5);
 
 -- Insert data into the ingredient table
 INSERT INTO ingredient (ingredient_name)
@@ -70,22 +69,8 @@ LIMIT 35;
 -- Sample data for recipe_account_save can be generated randomly based on existing recipes and accounts.
 -- For example:
 INSERT INTO recipe_account_save (recipe_id, account_id)
-SELECT 
-  recipe.id AS recipe_id,
-  account.id AS account_id
-FROM recipe, account
-ORDER BY RANDOM()
-LIMIT 25;
+values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6);
 
--- Sample data for recipe_account_rating can be generated randomly based on existing recipes and accounts.
-INSERT INTO recipe_account_rating (recipe_id, account_id, rating)
-SELECT 
-  recipe.id AS recipe_id,
-  account.id AS account_id,
-  FLOOR(RANDOM() * 5 + 1) AS rating
-FROM recipe, account
-ORDER BY RANDOM()
-LIMIT 15;
 
 -- Inserting 17 rows
 INSERT INTO subscription_account (account_id, follower_account_id)

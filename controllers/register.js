@@ -2,7 +2,6 @@ const db = require('../data/db');
 const mailer = require('../utils/nodemailer_helper'); 
 const dateTime = require('../utils/date_time'); 
 const bcrypt = require('bcrypt');
-const date_time = require('../utils/date_time');
 
 async function registerAccount(req, res){
     try {
@@ -16,7 +15,7 @@ async function registerAccount(req, res){
         res.status(200).json({mess: "Check your email",  code : 200});
     } catch (error) {
         console.log(error)
-        res.status(401).json({mess: error + "\nPlease contact a@gmail.com to report",  code : 401});
+        res.status(401).json({mess: error + " Please contact a@gmail.com to report",  code : 401});
     }
 }
 

@@ -3,6 +3,8 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../data/db');
 const e = require('express');
 const bcrypt = require('bcrypt');
+const dateTime = require('../utils/date_time'); 
+
 
 async function setProfileImage(req, res) {
     try {
@@ -40,29 +42,6 @@ async function setProfileImage(req, res) {
     }
 }
 
-// async function sendNotificationToFollower(req, res) {
-//     try {
-//         const registrationTokens = [];
-//         const userId = req.body.userId; //id of followed user 
-//         const userQuery = "select follower_account_id from subscription_account where account_id = $1;";
-//         const userResult = await db.query(userQuery, [userId]);
-//         for (let index = 0; index < userResult.length; index++) {
-//             const tokenQuery = "select firebase_token from firebase_messaging_token where account_id = $1;";
-//             const tokenResult = await db.query(tokenQuery, [userResult[index].follower_account_id]);
-//             console.log(tokenResult[0].firebase_token);
-//             // registrationTokens.push(tokenResult[0].firebase_token);
-//         }
-
-//         // firebase.sendNotificationTo({  //!qa
-//         //     deviceTokenList: ['ezDzgtKtTsGnDpb-HXJsGz:APA91bEVw5ITiUJ7cK5buZJuenp2tLa0AfVqrwrxV-ekG6g5XkuXMWFPRRAbYO5-lxnmC6iAIwGtvNBY2ygW513CgaHmQ6zBzEPXEek9bRQwxPj7DqYzi5XMH09koijV4GKpDfXaOyBv'], 
-//         //     tilte: '8500000', 
-//         //     content: '2:45',
-//         // })
-//     } catch (error) {
-//         res.status(500).json({ mess: error.message, code: 500 });
-//     }
-// }
-
 async function registerUserDeviceToken(req, res) {
     try {
         const userId = req.body.userId; //id of user 
@@ -77,12 +56,10 @@ async function registerUserDeviceToken(req, res) {
 async function getProfileImage(req, res) {
     try {
         const userId = req.body.userId;
-        const userQuery = "SELECT image FROM account WHERE id = $1";
+        const userQuery = "SELECT user_image FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [userId]);
-        const fileUrl = await firebase.getImageUrl(userResult[0].image);
-        // const fileUrl = await firebase.getImageUrl(req.query.imageId);
-        console.log('File url ' + fileUrl);
-        res.setHeader('Content-Type', 'application/json');
+        const fileUrl = await firebase.getImageUrl(userResult[0].user_image);
+        // res.setHeader('Content-Type', 'application/json');
         res.status(200).json({ mess: "success", data: fileUrl, code: 200 });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
@@ -94,11 +71,7 @@ async function updateProfileImage(req, res, next) {
         const file = req.file;
         const userId = req.body.userId;
 
-        if (imageId === null) {
-            next()
-        }
-
-        const userQuery = "SELECT image FROM account WHERE id = $1";
+        const userQuery = "SELECT user_image FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [userId]);
         const existingImageID = userResult[0].image;
 
@@ -143,11 +116,12 @@ async function updateUserData(req, res) {
         const userId = req.body.userId;
         const userName = req.body.userName;
         const userEmail = req.body.userEmail;
-        const updateUserQuery = "UPDATE account SET user_name = $1, user_email = $2 WHERE id = $3";
-        await db.query(updateUserQuery, [userName, userEmail, userId]);
-        res.status(200).json({ mess: "success", code: 200 });
+        const description = req.body.description;
+        const updateUserQuery = "UPDATE account SET user_name = $1, user_email = $2, description = $3, update_at = $4 WHERE id = $5";
+        await db.query(updateUserQuery, [userName, userEmail, description, dateTime.currentDateDMY(), userId]);
+        res.status(200).json({ mess: "success", code: 200, data: { userName: userName, userEmail: userEmail, description: description }});
     } catch (error) {
-        res.status(500).json({ mess: 'Error updating user data', code: 500 });
+        res.status(500).json({ mess: 'Error updating user data ' + error, code: 500 });
     }
 }
 
@@ -182,6 +156,5 @@ module.exports = {
     updateUserData: updateUserData,
     retrieveUserData: retrieveUserData,
     changeUserPassword: changeUserPassword,
-    // sendNotificationToFollower: sendNotificationToFollower, //!qa
     registerUserDeviceToken: registerUserDeviceToken,
 }

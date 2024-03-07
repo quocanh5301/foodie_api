@@ -22,6 +22,7 @@ create table if not exists account (
   user_name varchar (50) not null,
   user_email varchar (100) not null,
   user_password varchar (150) not null,
+  description varchar (100),
   update_at date not null,
   join_at date not null,
   user_image varchar(100)
@@ -34,7 +35,7 @@ create table if not exists recipe (
   description text,
   instruction text,
   rating float not null,
-  follower int not null,
+  follower int not null, --number of user bookmarked this recipe
   num_of_rating int not null,
   num_of_comments int not null,
   update_at date not null,
