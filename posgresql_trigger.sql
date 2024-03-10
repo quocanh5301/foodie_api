@@ -116,16 +116,16 @@ execute procedure check_comment_validation();
 
 CREATE OR REPLACE FUNCTION update_recipe_follower()
 RETURNS TRIGGER AS $$
-declare new_num_of_follower int;
+declare new_num_of_followers int;
 BEGIN
     -- Calculate the total number of comments of the recipe
-    SELECT COUNT(*) INTO new_num_of_follower
+    SELECT COUNT(*) INTO new_num_of_followers
     FROM recipe_account_save
     WHERE recipe_id = NEW.recipe_id;
 
     -- Update the recipe table with the new values
     UPDATE recipe
-    SET follower  = new_num_of_follower
+    SET num_of_followers  = new_num_of_followers
     WHERE id = NEW.recipe_id;
 
     RETURN NEW;
@@ -142,6 +142,60 @@ execute procedure update_recipe_follower();
 
 
 
---
-CREATE EVENT `et_update_your_trigger_name`  ON SCHEDULE EVERY 1 MINUTE 
-STARTS '2010-01-01 00:00:00' 
+--update user follower number when new row add to subscription table
+CREATE OR REPLACE FUNCTION update_user_follower()
+RETURNS TRIGGER AS $$
+declare new_num_of_followers int;
+BEGIN
+    -- Calculate the total number of follower of user
+    SELECT COUNT(*) into new_num_of_followers
+    FROM subscription_account
+    WHERE account_id = NEW.account_id;
+
+
+    -- Update the recipe table with the new values
+    UPDATE account
+    SET num_of_followers = new_num_of_followers
+    WHERE id = NEW.account_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+drop trigger if exists update_user_follower on subscription_account;
+
+create trigger update_user_follower
+after insert or update 
+on subscription_account
+for each row
+execute procedure update_user_follower();
+
+--update number of comment's REPLY when new comment add to recipe_account_comment 
+CREATE OR REPLACE FUNCTION update_comment_reply_num()
+RETURNS TRIGGER AS $$
+declare new_num_of_reply int;
+BEGIN
+    -- Calculate the total number of follower of user
+    SELECT COUNT(*) into new_num_of_reply
+    FROM recipe_account_comment
+    WHERE parent_comment_id = NEW.parent_comment_id;
+
+
+    -- Update the recipe table with the new values
+    UPDATE recipe_account_comment
+    SET num_of_reply = new_num_of_reply
+    WHERE id = NEW.parent_comment_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+drop trigger if exists update_comment_reply on recipe_account_comment;
+
+create trigger update_comment_reply
+after insert or delete  
+on recipe_account_comment
+for each row
+execute procedure update_comment_reply_num();
+
+

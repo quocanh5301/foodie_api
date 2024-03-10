@@ -29,12 +29,16 @@ VALUES
  -- Insert data into the recipe_account_rating table 7 recipe_id and 10 account_id
 INSERT INTO recipe_account_rating (recipe_id, account_id, rating) 
 VALUES 
-  (1, 1, 4),(2, 1, 3),(1, 1, 4),(2, 1, 1),  (1, 2, 5),(2, 2, 5),(1, 2, 5),(2, 2, 4),
-  (2, 3, 2),(3, 3, 2),(2, 3, 3),(3, 3, 4),  (2, 4, 3),(3, 4, 5),(2, 4, 4),(3, 4, 5),
-  (3, 5, 3),(4, 5, 5),(3, 5, 4),(4, 5, 4),  (3, 6, 3),(4, 6, 5),(3, 6, 4),(4, 6, 5),
-  (4, 7, 4),(5, 7, 4),(4, 7, 5),(5, 7, 4),  (4, 8, 2),(5, 8, 5),(4, 8, 4),(5, 8, 5),
-  (5, 9, 5),(6, 9, 1),(5, 9, 2),(6, 9, 3),  (5, 10, 5),(6, 10,45),(5, 10, 4),(6, 10, 5),
-  (6, 1, 2),(7, 4, 4),(6, 6, 3),(7, 7, 5),  (6, 8, 4),(7, 9, 5),(6, 10, 4),(7, 2, 5);
+(1, 1, 5), (1, 2, 4), (1, 3, 3), (1, 4, 2), (1, 5, 1),
+(2, 1, 4), (2, 2, 3), (2, 3, 2), (2, 4, 1), (2, 5, 5),
+(3, 1, 3), (3, 2, 2), (3, 3, 1), (3, 4, 5), (3, 5, 4),
+(4, 1, 2), (4, 2, 1), (4, 3, 5), (4, 4, 4), (4, 5, 3),
+(5, 1, 1), (5, 2, 5), (5, 3, 4), (5, 4, 3), (5, 5, 2),
+(6, 2, 4), (6, 3, 3), (6, 4, 2), (6, 5, 1), (6, 6, 5),
+(7, 3, 5), (7, 4, 4), (7, 5, 3), (7, 6, 2), (7, 7, 1),
+(8, 4, 3), (8, 5, 2), (8, 6, 1), (8, 7, 5), (9, 5, 1),
+(9, 6, 5), (9, 7, 4), (10, 6, 4), (10, 7, 3), (5, 6, 5), (5, 7, 5), (6, 1, 4), (6, 7, 5), (4, 6, 4), (4, 7, 4);
+
 
 -- Insert data into the ingredient table
 INSERT INTO ingredient (ingredient_name)
@@ -54,6 +58,14 @@ VALUES
   ('Olive Oil'),
   ('Cheese'),
   ('Milk');
+ 
+ 
+INSERT INTO firebase_messaging_token  (firebase_token, account_id) 
+VALUES 
+('ezDzgtKtTsGnDpb-HXJsGz:APA91bEVw5ITiUJ7cK5buZJuenp2tLa0AfVqrwrxV-ekG6g5XkuXMWFPRRAbYO5-lxnmC6iAIwGtvNBY2ygW513CgaHmQ6zBzEPXEek9bRQwxPj7DqYzi5XMH09koijV4GKpDfXaOyBv', 8), -- pixel 5
+('c9so6X7YSPKoPeWShDraJA:APA91bHtX91W2avS0J5Jr0rNCd0tslvGTOaZDUjjDcT4PQzCAhohEVjrTmqGaTu8qdp5btaozMOf3mT1WemxX9EH9nVqfsXSn9xfANztpE_gUc5Pz7Yntn5YFzn7NdUpB8u_4-Ml0Inx', 9), -- pixel 3
+('fRDBuaKdRT2nZ_cQzPgaQH:APA91bEymwgbRap-1uAz7KS7ezHPwuEdUuRZDaZ2LgPl2POn9MAhKqr7msyZse6gwZ9_Q7Q-wgla0P45NUvfGeO7ZxGHodcPtUTx3PJc8b5aLFq2GGbchdE8Xh8aJy2Aow_M5KhFUan1', 10); -- poco
+
 
 -- Sample data for recipe_ingredient can be generated randomly based on existing recipes and ingredients.
 -- For example:
@@ -74,7 +86,8 @@ values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(
 
 -- Inserting 17 rows
 INSERT INTO subscription_account (account_id, follower_account_id)
-values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6);
+values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6),
+(8,9),(8,10),(10,8),(10,9);
 
 -- Inserting 40 rows
 INSERT INTO recipe_account_comment (recipe_id, account_id, comment_content, update_at, parent_comment_id)

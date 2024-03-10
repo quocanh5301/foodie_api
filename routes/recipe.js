@@ -8,5 +8,6 @@ router.get("/getNewRecipe", recipeController.getNewRecipe)
 router.get("/getTopRecipe", recipeController.getTopRecipe)
 router.get("/getRecipeOfUser", recipeController.getRecipeOfUser)
 router.post("/createNewRecipe", recipeController.createNewRecipe)
+router.post("/bookmarkRecipe", recipeController.bookmarkRecipe)
 
 module.exports = router;

@@ -19,4 +19,6 @@ router.post("/changeUserPassword", userController.changeUserPassword);
 
 router.post("/setFirebaseToken", userController.setFirebaseToken);
 
+router.post("/followUser", userController.followUser);
+
 module.exports = router;

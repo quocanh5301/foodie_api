@@ -23,9 +23,11 @@ create table if not exists account (
   user_email varchar (100) not null,
   user_password varchar (150) not null,
   description varchar (100),
+  num_of_followers int not null, --number of user followed this user
   update_at date not null,
   join_at date not null,
-  user_image varchar(100)
+  user_image varchar(100),
+  constraint unique_login unique (user_email, user_name)
 );
 
 create table if not exists recipe (
@@ -35,7 +37,7 @@ create table if not exists recipe (
   description text,
   instruction text,
   rating float not null,
-  follower int not null, --number of user bookmarked this recipe
+  num_of_followers int not null, --number of user bookmarked this recipe
   num_of_rating int not null,
   num_of_comments int not null,
   update_at date not null,
@@ -56,7 +58,7 @@ create table if not exists recipe_ingredient (
   constraint pk_recipe_id_ingredient_id unique (recipe_id, ingredient_id)
 );
 
-create table if not exists recipe_account_save (
+create table if not exists recipe_account_save ( --user bookmark recipe table
   recipe_id int not null,
   account_id int not null,
   constraint pk_recipe_id_account_id unique (recipe_id, account_id)
@@ -82,8 +84,28 @@ create table if not exists recipe_account_comment (
   account_id int not null,
   comment_content TEXT not null,
   update_at date not null,
+  num_of_reply int not null,
   parent_comment_id int
 );
+
+create table if not exists notification (
+  id serial primary key,
+  title varchar(50) not null,
+  notification_content varchar(100) not null,
+  create_at date not null
+);
+
+create table if not exists notification_to_account (
+  notification_id int not null,
+  account_id int not null,
+  is_seen int not null
+);
+
+CREATE INDEX idx_notification_id ON notification_to_account (notification_id);
+CREATE INDEX idx_account_id ON notification_to_account (account_id);
+
+
+
 
 
 

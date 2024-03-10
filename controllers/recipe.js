@@ -154,7 +154,7 @@ async function createNewRecipe(req, res) {
                     "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
                     "New recipe has been created",
                 );
-                res.status(200).json({ mess: "create new recipe success", code: 200 });
+                res.status(200).json({ mess: "success", code: 200 });
             },
             onFail: async (err) => {
                 try {
@@ -176,6 +176,18 @@ async function createNewRecipe(req, res) {
     }
 }
 
+async function bookmarkRecipe(req, res) {
+    try {
+        const userId = req.body.userId;
+        const recipeId = req.body.recipeId;
+        const bookmarkRecipeQuery = "INSERT INTO recipe_account_save (recipe_id, account_id) values ($1,$2);"
+        await db.query(bookmarkRecipeQuery, [recipeId, userId]);
+        res.status(200).json({ mess: "success", code: 200 });
+    } catch (error) {
+        res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
 module.exports = {
     getBookmarkList: getBookmarkList,
     getRecipeDetail: getRecipeDetail,
@@ -183,4 +195,5 @@ module.exports = {
     getTopRecipe: getTopRecipe,
     getRecipeOfUser: getRecipeOfUser,
     createNewRecipe: createNewRecipe,
+    bookmarkRecipe: bookmarkRecipe,
 }

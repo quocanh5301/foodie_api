@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 
 async function logIn(req, res) {
     try {
-        //! qa 29/11
         const { email, password } = req.body;
         const rows = await db.query('SELECT * FROM account WHERE user_email = $1', [email]);
         if (rows.length === 0) return res.status(401).json({ mess: "Email is incorrect", code: 401 });
@@ -21,7 +20,8 @@ async function logIn(req, res) {
         }
         res.json({ mess: "success", data: tokens, code: 200 });
     } catch (error) {
-        res.status(401).json({ mess: error.message, code: 401 });
+        console.log(error);
+        res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -31,13 +31,13 @@ async function refreshToken(req, res) {
         const refreshToken = req.body.refreshToken; //Bearer TOKEN
         if (refreshToken === null) return res.sendStatus(401);
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (error, user) => {
-            if (error) return res.status(403).json({ mess: error.message });
+            if (error) return res.status(500).json({ mess: error.message, code: 500 });
             let tokens = jwtHelper.jwtTokens(user);
             await db.query("UPDATE account_login_status SET session_token = $1 WHERE account_id = $2;", [tokens.accessToken, userId]);
             return res.status(200).json({ data: tokens, mess: "success", code: 200 });
         });
     } catch (error) {
-        res.status(401).json({ mess: error.message, code: 401 });
+        res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -50,11 +50,11 @@ async function logOut(req, res) {
 
         if (accessToken === null) return res.sendStatus(401);
         jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, async (error, user) => {
-            if (error) return res.status(403).json({ mess: error.message });
+            if (error) return res.status(500).json({ mess: error.message ,code: 500});
 
             await db.query('delete from firebase_messaging_token WHERE account_id = $1 or firebase_token = $2', [userId, firebaseToken]);
             await db.query("delete from account_login_status WHERE user_email = $1", [email]);
-            return res.status(200).json({ mess: "Logout success", code: 200 });
+            return res.status(200).json({ mess: "success", code: 200 });
         });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });

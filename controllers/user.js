@@ -11,10 +11,6 @@ async function setProfileImage(req, res) {
         const userId = req.body.userId;
         const file = req.file;
 
-        console.log('Received body:', req.body);
-        console.log('Received Parameters:', userId);
-        console.log('Received File:', file);
-
         const imageID = uuidv4();
         const fileName = `${imageID}`;
         await firebase.uploadFile({
@@ -28,7 +24,7 @@ async function setProfileImage(req, res) {
                     console.log('File fail to uploaded to Firebase Storage' + error);
                 }
                 console.log('File uploaded to Firebase Storage');
-                res.status(200).json({ mess: 'Data received and file uploaded successfully!', code: 200 });
+                res.status(200).json({ mess: 'success', code: 200 });
             },
             onFail: (err) => {
                 console.error('Error uploading to Firebase Storage:', err);
@@ -38,17 +34,6 @@ async function setProfileImage(req, res) {
     } catch (error) {
         console.log(error);
         res.status(401).json({ mess: error.message, code: 401 });
-    }
-}
-
-async function registerUserDeviceToken(req, res) {
-    try {
-        const userId = req.body.userId; //id of user 
-        const deviceToken = req.body.deviceToken; //deviceToken of user 
-        const userQuery = "INSERT INTO firebase_messaging_token (firebase_token, account_id) VALUES ($1, $2);";
-        await db.query(userQuery, [userId, deviceToken]);
-    } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -69,6 +54,7 @@ async function updateProfileImage(req, res, next) {
     try {
         const file = req.file;
         const userId = req.body.userId;
+
         const userQuery = "SELECT user_image FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [userId]);
         const existingImageID = userResult[0].image;
@@ -95,7 +81,7 @@ async function updateProfileImage(req, res, next) {
                     return;
                 }
                 console.log('File uploaded to Firebase Storage');
-                res.status(200).json({ mess: 'Data received and file uploaded successfully!', code: 200 });
+                res.status(200).json({ mess: 'success', code: 200 });
             },
             onFail: (err) => {
                 console.error('Error uploading to Firebase Storage:', err);
@@ -154,6 +140,18 @@ async function setFirebaseToken(req, res) {
     }
 }
 
+async function followUser(req, res) {
+    try {
+        const userId = req.body.userId; //to user
+        const followerUserId = req.body.followerUserId; //from user
+        const followUserQuery = "INSERT INTO subscription_account (account_id, follower_account_id) values ($1,$2);"
+        await db.query(followUserQuery, [userId, followerUserId]);
+        res.status(200).json({ mess: "success", code: 200});
+    } catch (error) {
+        res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
 module.exports = {
     setProfileImage: setProfileImage,
     getProfileImage: getProfileImage,
@@ -161,5 +159,5 @@ module.exports = {
     updateUserData: updateUserData,
     setFirebaseToken: setFirebaseToken,
     changeUserPassword: changeUserPassword,
-    registerUserDeviceToken: registerUserDeviceToken,
+    followUser: followUser,
 }
