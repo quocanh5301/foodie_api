@@ -165,7 +165,7 @@ $$ LANGUAGE plpgsql;
 drop trigger if exists update_user_follower on subscription_account;
 
 create trigger update_user_follower
-after insert or update 
+after insert or delete
 on subscription_account
 for each row
 execute procedure update_user_follower();

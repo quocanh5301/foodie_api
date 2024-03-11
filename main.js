@@ -32,7 +32,7 @@ app.listen(3000);
 
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers['Authorization']; //Bearer TOKEN
+  const authHeader = req.headers['authorization']; //Bearer TOKEN
   const accessToken = authHeader && authHeader.split(' ')[1];
   if (accessToken == null) return res.status(401).json({ mess: "Null token", code: 401 });
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, async (error, user) => {

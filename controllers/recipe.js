@@ -13,9 +13,10 @@ async function getBookmarkList(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             if (recipe.recipe_image !== null) {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                delete recipe.recipe_image;
                 return { ...recipe, imageUrl: imageUrl[0] };
             }
-
+            delete recipe.recipe_image;
             return { ...recipe, imageUrl: null };
         }));
 
@@ -33,6 +34,7 @@ async function getRecipeDetail(req, res) {
         const recipeDetail = await db.query("select * from recipe where id = $1", [recipeId]);
         if (recipeDetail[0].recipe_image !== null) {
             const imageUrl = await firebase.getImageUrl(recipeDetail[0].recipe_image);
+            delete recipeDetail[0].recipe_image;
             return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: imageUrl[0], ingredients } });
         }
 
@@ -50,11 +52,13 @@ async function getNewRecipe(req, res) {
         const rows = await db.query(newRecipeQuery, [pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
+
             if (recipe.recipe_image !== null) {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                delete recipe.recipe_image;
                 return { ...recipe, imageUrl: imageUrl[0] };
             }
-
+            delete recipe.recipe_image;
             return { ...recipe, imageUrl: null };
         }));
 
@@ -74,9 +78,10 @@ async function getTopRecipe(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             if (recipe.recipe_image !== null) {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                delete recipe.recipe_image;
                 return { ...recipe, imageUrl: imageUrl[0] };
             }
-
+            delete recipe.recipe_image;
             return { ...recipe, imageUrl: null };
         }));
 
@@ -97,9 +102,10 @@ async function getRecipeOfUser(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             if (recipe.recipe_image !== null) {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                delete recipe.recipe_image;
                 return { ...recipe, imageUrl: imageUrl[0] };
             }
-
+            delete recipe.recipe_image;
             return { ...recipe, imageUrl: null };
         }));
 
@@ -195,6 +201,27 @@ async function bookmarkRecipe(req, res) {
     }
 }
 
+async function rateRecipe(req, res) {
+    try {
+        const userId = req.body.userId;
+        const recipeId = req.body.recipeId;
+        const rating = req.body.rating;
+        const checkRatingQuery = "select count(*) from recipe_account_rating where recipe_id = $1 and account_id = $2"
+        const existed = await db.query(checkRatingQuery, [recipeId, userId]);
+        if (existed[0].count === 1) {
+            const updateRatingQuery = "update recipe_account_rating set rating = $1 where recipe_id = $2 and account_id = $3"
+            await db.query(updateRatingQuery, [rating, recipeId, userId]);
+            res.status(200).json({ mess: "success", code: 200 });
+        } else {
+            const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, rating) values ($1, $2, $3)"
+            await db.query(insertRatingQuery, [recipeId, userId, rating]);
+            res.status(200).json({ mess: "success", code: 200 });
+        }
+    } catch (error) {
+        res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
 async function searchRecipeAndUser(req, res) {
     try {
         const searchKey = req.body.searchKey;
@@ -206,9 +233,10 @@ async function searchRecipeAndUser(req, res) {
         const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
             if (recipe.recipe_image !== null) {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                delete recipe.recipe_image;
                 return { ...recipe, imageUrl: imageUrl[0] };
             }
-
+            delete recipe.recipe_image;
             return { ...recipe, imageUrl: null };
         }));
 
@@ -225,6 +253,39 @@ async function searchRecipeAndUser(req, res) {
     }
 }
 
+async function getPersonalRatingForRecipe(req, res) {
+    try {
+        const userId = req.body.userId;
+        const recipeId = req.body.recipeId;
+        const queryStr = "select rating from recipe_account_rating where recipe_id = $1 and account_id = $2"
+        const rows = await db.query(queryStr, [recipeId, userId]);
+        res.status(200).json({ mess: "success", code: 200, data: rows[0].rating });
+    } catch (error) {
+        res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
+async function getUserFollowing(req, res) {
+    try {
+        const userId = req.body.userId;
+        const getFollowingUserRecipeQuery = "select * from recipe where account_id in (SELECT id FROM subscription_account join account on subscription_account.account_id = account.id WHERE follower_account_id = $1)";
+        const followingUserRecipe = await db.query(getFollowingUserRecipeQuery, [userId]);
+        const recipeWithImageUrl = await Promise.all(followingUserRecipe.map(async (recipe) => {
+            if (recipe.recipe_image !== null) {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                delete recipe.recipe_image;
+                return { ...recipe, imageUrl: imageUrl[0] };
+            }
+            delete recipe.recipe_image;
+            return { ...recipe, imageUrl: null };
+        }));
+
+        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+    } catch (error) {
+        res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
 module.exports = {
     getBookmarkList: getBookmarkList,
     getRecipeDetail: getRecipeDetail,
@@ -234,4 +295,7 @@ module.exports = {
     createNewRecipe: createNewRecipe,
     bookmarkRecipe: bookmarkRecipe, //!qa unbookmark
     searchRecipeAndUser: searchRecipeAndUser,
+    getPersonalRatingForRecipe: getPersonalRatingForRecipe,
+    rateRecipe: rateRecipe,
+    getUserFollowing: getUserFollowing, //get recipe of users that following choosen user
 }

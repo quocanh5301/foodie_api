@@ -21,4 +21,6 @@ router.post("/setFirebaseToken", userController.setFirebaseToken);
 
 router.post("/followUser", userController.followUser);
 
+router.post("/searchUser", userController.searchUser);
+
 module.exports = router;
