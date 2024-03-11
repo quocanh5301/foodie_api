@@ -144,11 +144,31 @@ async function followUser(req, res) {
     try {
         const userId = req.body.userId; //to user
         const followerUserId = req.body.followerUserId; //from user
-        const followUserQuery = "INSERT INTO subscription_account (account_id, follower_account_id) values ($1,$2);"
-        await db.query(followUserQuery, [userId, followerUserId]);
-        res.status(200).json({ mess: "success", code: 200});
+        const isFollow = req.body.isFollow;
+        if (isFollow === 1) {
+            const followUserQuery = "INSERT INTO subscription_account (account_id, follower_account_id) values ($1,$2);"
+            await db.query(followUserQuery, [userId, followerUserId]);
+            res.status(200).json({ mess: "success", code: 200 });
+        } else {
+            const unfollowUserQuery = "DELETE FROM subscription_account WHERE account_id = $1 AND follower_account_id = $2;"
+            await db.query(unfollowUserQuery, [userId, followerUserId]);
+            res.status(200).json({ mess: "success", code: 200 });
+        }
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
+async function searchUser(req, res) {
+    try {
+        const searchKey = req.body.searchKey;
+        const page = req.body.page;
+        const pageSize = req.body.pageSize;
+        const searchUserQuery = "SELECT * FROM account WHERE  where user_name like $1 limit $2 offset $3";
+        const searchResult = await db.query(searchUserQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
+        res.status(200).json({ mess: "success", code: 200, data: searchResult });
+    } catch (error) {
+
     }
 }
 
@@ -159,5 +179,6 @@ module.exports = {
     updateUserData: updateUserData,
     setFirebaseToken: setFirebaseToken,
     changeUserPassword: changeUserPassword,
-    followUser: followUser,
+    followUser: followUser, //!qa unfollowUser
+    searchUser: searchUser,
 }

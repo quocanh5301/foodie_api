@@ -129,8 +129,8 @@ async function createNewRecipe(req, res) {
         const firebaseTokens = getFirebaseTokenResult.map((item) => {
             return item.firebase_token;
         });
-        
-        
+
+
         const userQuery = "SELECT user_name FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [createdUserId]);
 
@@ -180,9 +180,46 @@ async function bookmarkRecipe(req, res) {
     try {
         const userId = req.body.userId;
         const recipeId = req.body.recipeId;
-        const bookmarkRecipeQuery = "INSERT INTO recipe_account_save (recipe_id, account_id) values ($1,$2);"
-        await db.query(bookmarkRecipeQuery, [recipeId, userId]);
-        res.status(200).json({ mess: "success", code: 200 });
+        const isBookmark = req.body.isBookmark;
+        if (isBookmark === 1) {
+            const bookmarkRecipeQuery = "INSERT INTO recipe_account_save (recipe_id, account_id) values ($1,$2);"
+            await db.query(bookmarkRecipeQuery, [recipeId, userId]);
+            res.status(200).json({ mess: "success", code: 200 });
+        } else {
+            const unbookmarkRecipeQuery = "DELETE FROM recipe_account_save WHERE recipe_id = $1 and account_id = $2"
+            await db.query(unbookmarkRecipeQuery, [recipeId, userId]);
+            res.status(200).json({ mess: "success", code: 200 });
+        }
+    } catch (error) {
+        res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
+async function searchRecipeAndUser(req, res) {
+    try {
+        const searchKey = req.body.searchKey;
+        const page = req.body.page;
+        const pageSize = req.body.pageSize;
+        const recipeSearchQuery = "select * from recipe where recipe_name like $1 limit $2 offset $3"
+        const recipeRows = await db.query(recipeSearchQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
+
+        const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
+            if (recipe.recipe_image !== null) {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0] };
+            }
+
+            return { ...recipe, imageUrl: null };
+        }));
+
+        if (page === 0) {
+            const userSearchQuery = "select * from account where user_name like $1 order by id asc limit $2";
+            const userRows = await db.query(userSearchQuery, [`%${searchKey}%`, pageSize]);
+            res.status(200).json({ mess: "success", code: 200, data: { recipe: recipeWithImageUrl, user: userRows } });
+        }
+
+        res.status(200).json({ mess: "success", code: 200, data: { recipe: recipeWithImageUrl } });
+
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -195,5 +232,6 @@ module.exports = {
     getTopRecipe: getTopRecipe,
     getRecipeOfUser: getRecipeOfUser,
     createNewRecipe: createNewRecipe,
-    bookmarkRecipe: bookmarkRecipe,
+    bookmarkRecipe: bookmarkRecipe, //!qa unbookmark
+    searchRecipeAndUser: searchRecipeAndUser,
 }
