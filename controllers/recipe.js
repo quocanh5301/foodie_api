@@ -11,13 +11,16 @@ async function getBookmarkList(req, res) {
         const queryStr = "select * from (select * from recipe order by id desc) as sort_recipe where id in (select recipe_id from recipe_account_save where account_id = $1) limit $2 offset $3"
         const rows = await db.query(queryStr, [userId, pageSize, pageSize * page]);
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
-            if (recipe.recipe_image !== null) {
-                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                delete recipe.recipe_image;
-                return { ...recipe, imageUrl: imageUrl[0] };
-            }
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
             delete recipe.recipe_image;
-            return { ...recipe, imageUrl: null };
+            delete userInfo[0].user_password;
+            try {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+            } catch (error) {
+                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+            }
         }));
 
         res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
@@ -32,13 +35,18 @@ async function getRecipeDetail(req, res) {
         const queryIngredientStr = "SELECT ingredient_id, ingredient_name, ingredient_image, amount FROM recipe JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id JOIN ingredient ON recipe_ingredient.ingredient_id = ingredient.id where recipe.id = $1 ORDER BY ingredient_id ASC"
         const ingredients = await db.query(queryIngredientStr, [recipeId]);
         const recipeDetail = await db.query("select * from recipe where id = $1", [recipeId]);
+
+        const queryUserInfo = "SELECT * from account where id = $1"
+        const userInfo = await db.query(queryUserInfo, [recipeDetail[0].account_id]);
+        delete userInfo[0].user_password;
+
         if (recipeDetail[0].recipe_image !== null) {
             const imageUrl = await firebase.getImageUrl(recipeDetail[0].recipe_image);
             delete recipeDetail[0].recipe_image;
-            return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: imageUrl[0], ingredients } });
+            return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: imageUrl[0], owner: userInfo[0] ?? null, ingredients } });
         }
 
-        res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: null, ingredients } });
+        res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], imageUrl: null, owner: userInfo[0] ?? null, ingredients } });
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -52,14 +60,16 @@ async function getNewRecipe(req, res) {
         const rows = await db.query(newRecipeQuery, [pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
-
-            if (recipe.recipe_image !== null) {
-                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                delete recipe.recipe_image;
-                return { ...recipe, imageUrl: imageUrl[0] };
-            }
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
             delete recipe.recipe_image;
-            return { ...recipe, imageUrl: null };
+            delete userInfo[0].user_password;
+            try {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+            } catch (error) {
+                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+            }
         }));
 
         res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
@@ -76,13 +86,16 @@ async function getTopRecipe(req, res) {
         const rows = await db.query(newRecipeQuery, [pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
-            if (recipe.recipe_image !== null) {
-                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                delete recipe.recipe_image;
-                return { ...recipe, imageUrl: imageUrl[0] };
-            }
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
             delete recipe.recipe_image;
-            return { ...recipe, imageUrl: null };
+            delete userInfo[0].user_password;
+            try {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+            } catch (error) {
+                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+            }
         }));
 
         res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
@@ -100,13 +113,16 @@ async function getRecipeOfUser(req, res) {
         const rows = await db.query(newRecipeQuery, [userId, pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
-            if (recipe.recipe_image !== null) {
-                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                delete recipe.recipe_image;
-                return { ...recipe, imageUrl: imageUrl[0] };
-            }
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
             delete recipe.recipe_image;
-            return { ...recipe, imageUrl: null };
+            delete userInfo[0].user_password;
+            try {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+            } catch (error) {
+                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+            }
         }));
 
         res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
@@ -231,13 +247,16 @@ async function searchRecipeAndUser(req, res) {
         const recipeRows = await db.query(recipeSearchQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
-            if (recipe.recipe_image !== null) {
-                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                delete recipe.recipe_image;
-                return { ...recipe, imageUrl: imageUrl[0] };
-            }
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
             delete recipe.recipe_image;
-            return { ...recipe, imageUrl: null };
+            delete userInfo[0].user_password;
+            try {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+            } catch (error) {
+                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+            }
         }));
 
         if (page === 0) {
@@ -271,13 +290,16 @@ async function getUserFollowing(req, res) {
         const getFollowingUserRecipeQuery = "select * from recipe where account_id in (SELECT id FROM subscription_account join account on subscription_account.account_id = account.id WHERE follower_account_id = $1)";
         const followingUserRecipe = await db.query(getFollowingUserRecipeQuery, [userId]);
         const recipeWithImageUrl = await Promise.all(followingUserRecipe.map(async (recipe) => {
-            if (recipe.recipe_image !== null) {
-                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                delete recipe.recipe_image;
-                return { ...recipe, imageUrl: imageUrl[0] };
-            }
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
             delete recipe.recipe_image;
-            return { ...recipe, imageUrl: null };
+            delete userInfo[0].user_password;
+            try {
+                const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
+                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+            } catch (error) {
+                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+            }
         }));
 
         res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
@@ -297,5 +319,5 @@ module.exports = {
     searchRecipeAndUser: searchRecipeAndUser,
     getPersonalRatingForRecipe: getPersonalRatingForRecipe,
     rateRecipe: rateRecipe,
-    getUserFollowing: getUserFollowing, //get recipe of users that following choosen user
+    getUserFollowing: getUserFollowing, //get recipe of users that followed by choosen user
 }

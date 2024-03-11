@@ -41,7 +41,9 @@ function authenticateToken(req, res, next) {
     }
     const userQuery = "SELECT session_token FROM account_login_status WHERE user_email = $1";
     const userResult = await db.query(userQuery, [user.user_email]);
-
+    if (userResult.length === 0) {
+      return res.status(401).json({ mess: "Token is not valid", code: 401 });
+    }
     if (userResult[0].session_token !== accessToken) {
       return res.status(401).json({ mess: "Token is not valid", code: 401 });
     }

@@ -168,7 +168,7 @@ async function searchUser(req, res) {
         const searchResult = await db.query(searchUserQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
         res.status(200).json({ mess: "success", code: 200, data: searchResult });
     } catch (error) {
-
+        res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
