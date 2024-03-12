@@ -103,7 +103,7 @@ create table if not exists notification_to_account (
 
 CREATE INDEX idx_notification_id ON notification_to_account (notification_id);
 CREATE INDEX idx_account_id ON notification_to_account (account_id);
-
+ 
 
 
 

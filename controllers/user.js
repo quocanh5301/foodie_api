@@ -145,7 +145,7 @@ async function followUser(req, res) {
         const userId = req.body.userId; //to user
         const followerUserId = req.body.followerUserId; //from user
         const isFollow = req.body.isFollow;
-        if (isFollow === 1) {
+        if (isFollow == 1) {
             const followUserQuery = "INSERT INTO subscription_account (account_id, follower_account_id) values ($1,$2);"
             await db.query(followUserQuery, [userId, followerUserId]);
             res.status(200).json({ mess: "success", code: 200 });
@@ -164,7 +164,7 @@ async function searchUser(req, res) {
         const searchKey = req.body.searchKey;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const searchUserQuery = "SELECT * FROM account WHERE  where user_name like $1 limit $2 offset $3";
+        const searchUserQuery = "SELECT * FROM account WHERE  where user_name ilike $1 limit $2 offset $3";
         const searchResult = await db.query(searchUserQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
         res.status(200).json({ mess: "success", code: 200, data: searchResult });
     } catch (error) {

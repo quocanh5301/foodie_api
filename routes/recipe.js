@@ -22,6 +22,6 @@ router.post("/getPersonalRatingForRecipe", recipeController.getPersonalRatingFor
 
 router.post("/rateRecipe", recipeController.rateRecipe);
 
-router.get("/getUserFollowing", recipeController.getUserFollowing);
+router.get("/getUserFollowingNewRecipe", recipeController.getUserFollowingNewRecipe);
 
 module.exports = router;
