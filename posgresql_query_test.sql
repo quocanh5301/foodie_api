@@ -30,9 +30,10 @@ select * from recipe where recipe_name = 'Pancakes';
 
 select recipe_id from recipe_account_save where account_id = 5;
 
-update account set user_image = 'test/409109404_957680309062858_6882892167285190303_n.jpg' where id = 8;
+update account set user_image = 'test/409109404_957680309062858_6882892167285190303_n.jpg', user_name = 'hehe' where id = 8;
 
 update recipe set recipe_image = '424992880_435046962204108_5280980655528045169_n.jpg' where id = 2;
+update firebase_messaging_token set firebase_token = 'eStAFn1oQumhFbq5jKq2b4:APA91bEA_DMzlTVL6QBMtufI8LT6J_0Deftxzy-7uezp1L20zQ_zLwBgz7SywbpJq-rmMNJwi3Po3jExyaYSaYIFC7RuSbFQsFhdMUklC29I4t2-A8ZwyIeKpd9jMnKyjRFF2Bf8yYaL' where account_id = 10;
 
 select * from (select * from recipe order by id desc) as sort_recipe ORDER BY ABS(EXTRACT(EPOCH FROM create_at - CURRENT_TIMESTAMP)) DESC limit 3 offset 0;
 
@@ -45,7 +46,13 @@ select firebase_token from firebase_messaging_token join subscription_account on
 delete from recipe where recipe_name = 'some kind of food';
 
 
-select * from account where user_name like '%ad%' order by id asc limit 5 ;
+select recipe_id from recipe_account_save where account_id = 3;
 
+select * from recipe where account_id in (5,10);
+SELECT id FROM subscription_account join account on subscription_account.account_id = account.id WHERE follower_account_id = 1;
+select * from recipe where id in (select recipe_id from recipe_account_save where account_id = 3) limit 5 offset 0;
+
+select firebase_token from firebase_messaging_token join recipe on firebase_messaging_token.account_id = recipe.account_id  where recipe.id = 20;
+ 
 
 

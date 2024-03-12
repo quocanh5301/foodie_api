@@ -22,7 +22,7 @@ async function getBookmarkList(req, res) {
             if (checkBookmark.length === 1) {
                 isBookmark = 1;
             }
-            
+
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
                 return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
@@ -269,15 +269,36 @@ async function rateRecipe(req, res) {
         const rating = req.body.rating;
         const checkRatingQuery = "select count(*) from recipe_account_rating where recipe_id = $1 and account_id = $2"
         const existed = await db.query(checkRatingQuery, [recipeId, userId]);
-        if (existed[0].count === 1) {
+        if (existed[0].count == 1) {
             const updateRatingQuery = "update recipe_account_rating set rating = $1 where recipe_id = $2 and account_id = $3"
             await db.query(updateRatingQuery, [rating, recipeId, userId]);
-            res.status(200).json({ mess: "success", code: 200 });
         } else {
             const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, rating) values ($1, $2, $3)"
             await db.query(insertRatingQuery, [recipeId, userId, rating]);
-            res.status(200).json({ mess: "success", code: 200 });
         }
+
+        const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token join recipe on firebase_messaging_token.account_id = recipe.account_id  where recipe.id = $1";
+        const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [recipeId]);
+        const firebaseTokens = getFirebaseTokenResult.map((item) => {
+            return item.firebase_token;
+        });
+
+        const userNameQuery = "select user_name from account where id = $1"
+        const userName = await db.query(userNameQuery, [userId]);
+
+        const recipeNameQuery = "select recipe_name from recipe where id = $1"
+        const recipeName = await db.query(recipeNameQuery, [recipeId]);
+        
+        if (firebaseTokens.length > 0) {
+            firebase.sendNotificationTo(
+                firebaseTokens,
+                "New Rating !!!",
+                "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars",
+            );
+        }
+
+        return res.status(200).json({ mess: "success", code: 200 });
+
     } catch (error) {
         res.status(500).json({ mess: error.message, code: 500 });
     }

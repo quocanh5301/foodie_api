@@ -5,9 +5,14 @@ const bcrypt = require('bcrypt');
 
 async function registerAccount(req, res){
     try {
-        const queryStr = "select user_name from account where user_email = $1"
-        const rows = await db.query(queryStr, [req.body.email]);
-        if(rows.length != 0) return res.status(200).json({mess: "Email already exist",  code : 200});
+        const email = req.body.email;
+        const name = req.body.name;
+        const password = req.body.password;
+        if(!email || !name || !password) return res.status(401).json({mess: "Please fill in all fields",  code : 401});
+
+        const queryStr = "select user_name from account where user_email = $1 or user_name = $2"
+        const rows = await db.query(queryStr, [email, name]);
+        if(rows.length != 0) return res.status(200).json({mess: "Email or user name already exist",  code : 200});
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const queryStr2 = "insert into register_account (user_name, user_email, user_password) values ($1, $2, $3)"
         await db.query(queryStr2, [req.body.name, req.body.email, hashedPassword]);
