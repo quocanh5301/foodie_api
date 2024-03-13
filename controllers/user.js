@@ -169,9 +169,9 @@ async function searchUser(req, res) {
             try {
                 const imageUrl = await firebase.getImageUrl(user.user_image);
                 delete user.user_image;
-                return { ...user, imageUrl: imageUrl[0] ?? null };
+                return { ...user, userImageUrl: imageUrl[0] ?? null };
             } catch (error) {
-                return { ...user, imageUrl: null };
+                return { ...user, userImageUrl: null };
             }
         }));
 

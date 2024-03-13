@@ -13,7 +13,6 @@ async function getBookmarkList(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT * from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-            delete recipe.recipe_image;
             delete userInfo[0].user_password;
 
             var isBookmark = 0;
@@ -25,9 +24,11 @@ async function getBookmarkList(req, res) {
 
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null };
             } catch (error) {
-                return { ...recipe, isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: null, owner: userInfo[0] ?? null };
             }
         }));
 
@@ -61,10 +62,10 @@ async function getRecipeDetail(req, res) {
         if (recipeDetail[0].recipe_image !== null) {
             const imageUrl = await firebase.getImageUrl(recipeDetail[0].recipe_image);
             delete recipeDetail[0].recipe_image;
-            return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, imageUrl: imageUrl[0], owner: userInfo[0] ?? null, ingredients } });
+            return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null, ingredients } });
         }
 
-        return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null, ingredients } });
+        return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, recipeImageUrl: null, owner: userInfo[0] ?? null, ingredients } });
     } catch (error) {
         return res.status(500).json({ mess: error.message, code: 500 });
     }
@@ -81,7 +82,6 @@ async function getNewRecipe(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT * from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-            delete recipe.recipe_image;
             delete userInfo[0].user_password;
 
 
@@ -94,9 +94,11 @@ async function getNewRecipe(req, res) {
 
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                return { ...recipe, isBookmark: isBookmark, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null };
             } catch (error) {
-                return { ...recipe, isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: null, owner: userInfo[0] ?? null };
             }
         }));
 
@@ -117,7 +119,6 @@ async function getTopRecipe(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT * from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-            delete recipe.recipe_image;
             delete userInfo[0].user_password;
 
             var isBookmark = 0;
@@ -129,9 +130,11 @@ async function getTopRecipe(req, res) {
 
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                return { ...recipe, isBookmark: isBookmark, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null };
             } catch (error) {
-                return { ...recipe, isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: null, owner: userInfo[0] ?? null };
             }
         }));
 
@@ -152,7 +155,6 @@ async function getRecipeOfUser(req, res) {
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT * from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-            delete recipe.recipe_image;
             delete userInfo[0].user_password;
 
             var isBookmark = 0;
@@ -164,9 +166,11 @@ async function getRecipeOfUser(req, res) {
 
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                return { ...recipe, isBookmark: isBookmark, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null };
             } catch (error) {
-                return { ...recipe, isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: null, owner: userInfo[0] ?? null };
             }
         }));
 
@@ -304,7 +308,6 @@ async function searchRecipeAndUser(req, res) {
         const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
             const queryUserInfo = "SELECT * from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-            delete recipe.recipe_image;
             delete userInfo[0].user_password;
 
             var isBookmark = 0;
@@ -316,9 +319,11 @@ async function searchRecipeAndUser(req, res) {
 
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                return { ...recipe, isBookmark: isBookmark, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null };
             } catch (error) {
-                return { ...recipe, isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, isBookmark: isBookmark, recipeImageUrl: null, owner: userInfo[0] ?? null };
             }
         }));
 
@@ -360,13 +365,15 @@ async function getUserFollowingNewRecipe(req, res) {
         const recipeWithImageUrl = await Promise.all(followingUserRecipe.map(async (recipe) => {
             const queryUserInfo = "SELECT * from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-            delete recipe.recipe_image;
             delete userInfo[0].user_password;
+            
             try {
                 const imageUrl = await firebase.getImageUrl(recipe.recipe_image);
-                return { ...recipe, imageUrl: imageUrl[0], owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, recipeImageUrl: imageUrl[0], owner: userInfo[0] ?? null };
             } catch (error) {
-                return { ...recipe, imageUrl: null, owner: userInfo[0] ?? null };
+                delete recipe.recipe_image;
+                return { ...recipe, recipeImageUrl: null, owner: userInfo[0] ?? null };
             }
         }));
 
