@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 
-router.get("/getProfileImage", userController.getProfileImage);
+router.post("/getProfileImage", userController.getProfileImage);
 
 router.post("/updateProfileImage", upload.single('file'), userController.updateProfileImage);
 

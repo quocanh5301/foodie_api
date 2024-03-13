@@ -24,16 +24,15 @@ async function setProfileImage(req, res) {
                     console.log('File fail to uploaded to Firebase Storage' + error);
                 }
                 console.log('File uploaded to Firebase Storage');
-                res.status(200).json({ mess: 'success', code: 200 });
+                return res.status(200).json({ mess: 'success', code: 200 });
             },
             onFail: (err) => {
                 console.error('Error uploading to Firebase Storage:', err);
-                res.status(500).json({ mess: 'Error uploading to Firebase Storage', code: 500 });
+                return res.status(500).json({ mess: 'Error uploading to Firebase Storage', code: 500 });
             },
         });
     } catch (error) {
-        console.log(error);
-        res.status(401).json({ mess: error.message, code: 401 });
+        return res.status(401).json({ mess: error.message, code: 401 });
     }
 }
 
@@ -44,9 +43,9 @@ async function getProfileImage(req, res) {
         const userResult = await db.query(userQuery, [userId]);
         const fileUrl = await firebase.getImageUrl(userResult[0].user_image);
         // res.setHeader('Content-Type', 'application/json');
-        res.status(200).json({ mess: "success", data: fileUrl, code: 200 });
+        return res.status(200).json({ mess: "success", data: fileUrl, code: 200 });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -77,19 +76,18 @@ async function updateProfileImage(req, res, next) {
                     await db.query(queryStr, [existingImageID, userId]);
                 } catch (error) {
                     console.error('Error updating user record:', error);
-                    res.status(500).json({ mess: 'Error updating user record', code: 500 });
-                    return;
+                    return res.status(500).json({ mess: 'Error updating user record', code: 500 });
                 }
                 console.log('File uploaded to Firebase Storage');
-                res.status(200).json({ mess: 'success', code: 200 });
+                return res.status(200).json({ mess: 'success', code: 200 });
             },
             onFail: (err) => {
                 console.error('Error uploading to Firebase Storage:', err);
-                res.status(500).json({ mess: 'Error uploading to Firebase Storage', code: 500 });
+                return res.status(500).json({ mess: 'Error uploading to Firebase Storage', code: 500 });
             },
         });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -101,9 +99,9 @@ async function updateUserData(req, res) {
         const description = req.body.description;
         const updateUserQuery = "UPDATE account SET user_name = $1, user_email = $2, description = $3, update_at = $4 WHERE id = $5";
         await db.query(updateUserQuery, [userName, userEmail, description, dateTime.currentDateDMY(), userId]);
-        res.status(200).json({ mess: "success", code: 200, data: { userName: userName, userEmail: userEmail, description: description } });
+        return res.status(200).json({ mess: "success", code: 200, data: { userName: userName, userEmail: userEmail, description: description } });
     } catch (error) {
-        res.status(500).json({ mess: 'Error updating user data ' + error, code: 500 });
+        return res.status(500).json({ mess: 'Error updating user data ' + error, code: 500 });
     }
 }
 
@@ -118,11 +116,11 @@ async function changeUserPassword(req, res) {
         const validPassword = await bcrypt.compare(oldPassword, userResult[0].user_password);
         if (!validPassword) return res.status(401).json({ mess: "Incorrect old password", code: 401 });
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const updateUserQuery = "UPDATE account SET user_password = $1 WHERE id = $2";
-        await db.query(updateUserQuery, [hashedPassword, userId]);
-        res.status(200).json({ mess: "success", code: 200 });
+        const updateUserQuery = "UPDATE account SET user_password = $1, update_at = $2 WHERE id = $3";
+        await db.query(updateUserQuery, [hashedPassword, dateTime.currentDateDMY_HM(), userId]);
+        return res.status(200).json({ mess: "success", code: 200 });
     } catch (error) {
-        res.status(500).json({ mess: 'Error updating user password' + error, code: 500 });
+        return res.status(500).json({ mess: 'Error updating user password' + error, code: 500 });
     }
 }
 
@@ -134,9 +132,9 @@ async function setFirebaseToken(req, res) {
 
         const registerFirebaseQuery = "INSERT INTO firebase_messaging_token (firebase_token, account_id) VALUES ($1, $2)";
         await db.query(registerFirebaseQuery, [firebaseToken, userId]);
-        res.status(200).json({ mess: "success", code: 200 });
+        return res.status(200).json({ mess: "success", code: 200 });
     } catch (error) {
-        res.status(500).json({ mess: 'Error updating Firebase Token ' + error, code: 500 });
+        return res.status(500).json({ mess: 'Error updating Firebase Token ' + error, code: 500 });
     }
 }
 
@@ -148,14 +146,14 @@ async function followUser(req, res) {
         if (isFollow == 1) {
             const followUserQuery = "INSERT INTO subscription_account (account_id, follower_account_id) values ($1,$2);"
             await db.query(followUserQuery, [userId, followerUserId]);
-            res.status(200).json({ mess: "success", code: 200 });
+            return res.status(200).json({ mess: "success", code: 200 });
         } else {
             const unfollowUserQuery = "DELETE FROM subscription_account WHERE account_id = $1 AND follower_account_id = $2;"
             await db.query(unfollowUserQuery, [userId, followerUserId]);
-            res.status(200).json({ mess: "success", code: 200 });
+            return res.status(200).json({ mess: "success", code: 200 });
         }
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -164,11 +162,22 @@ async function searchUser(req, res) {
         const searchKey = req.body.searchKey;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const searchUserQuery = "SELECT * FROM account WHERE  where user_name ilike $1 limit $2 offset $3";
+        const searchUserQuery = "SELECT id, user_name, user_email, description, num_of_followers, update_at, join_at, user_image FROM account where user_name ilike $1 limit $2 offset $3";
         const searchResult = await db.query(searchUserQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
-        res.status(200).json({ mess: "success", code: 200, data: searchResult });
+
+        const userWithImageUrl = await Promise.all(searchResult.map(async (user) => {
+            try {
+                const imageUrl = await firebase.getImageUrl(user.user_image);
+                delete user.user_image;
+                return { ...user, imageUrl: imageUrl[0] ?? null };
+            } catch (error) {
+                return { ...user, imageUrl: null };
+            }
+        }));
+
+        return res.status(200).json({ mess: "success", code: 200, data: userWithImageUrl });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 

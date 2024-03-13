@@ -31,9 +31,9 @@ async function getBookmarkList(req, res) {
             }
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+        return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -64,9 +64,9 @@ async function getRecipeDetail(req, res) {
             return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, imageUrl: imageUrl[0], owner: userInfo[0] ?? null, ingredients } });
         }
 
-        res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null, ingredients } });
+        return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, imageUrl: null, owner: userInfo[0] ?? null, ingredients } });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -100,9 +100,9 @@ async function getNewRecipe(req, res) {
             }
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+        return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -135,9 +135,9 @@ async function getTopRecipe(req, res) {
             }
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+        return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -170,9 +170,9 @@ async function getRecipeOfUser(req, res) {
             }
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+        return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -197,21 +197,9 @@ async function createNewRecipe(req, res) {
             return item.firebase_token;
         });
 
-
         const userQuery = "SELECT user_name FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [createdUserId]);
 
-        //!qa test
-        // const insertRecipeQuery = "insert into recipe (account_id, recipe_name, description, instruction, rating, follower, num_of_rating, num_of_comments, update_at, create_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
-        // await db.query(insertRecipeQuery, [createdUserId, recipeName, recipeDescription, recipeInstruction, 0, 0, 0, 0, dateTime.currentDateDMY_HM(), dateTime.currentDateDMY_HM()]); 
-        // console.log(firebaseTokens);
-        // await firebase.sendNotificationTo(
-        //     firebaseTokens,
-        //     "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
-        //     "New recipe has been created",
-        // );
-        // res.status(200).json({ mess: "create new recipe success", code: 200 });
-        //!qa test
         await firebase.uploadFile({
             file: file,
             fileName: fileName,
@@ -221,7 +209,7 @@ async function createNewRecipe(req, res) {
                     "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
                     "New recipe has been created",
                 );
-                res.status(200).json({ mess: "success", code: 200 });
+                return res.status(200).json({ mess: "success", code: 200 });
             },
             onFail: async (err) => {
                 try {
@@ -232,14 +220,14 @@ async function createNewRecipe(req, res) {
                         title: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
                         body: "New recipe has been created",
                     });
-                    res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
+                    return res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
                 } catch (error) {
-                    res.status(500).json({ mess: 'fail to insert recipe data, upload recipe image to firebase and removing wrong data' + err + 'and ' + error, code: 500 });
+                    return res.status(500).json({ mess: 'fail to insert recipe data, upload recipe image to firebase and removing wrong data' + err + 'and ' + error, code: 500 });
                 }
             },
         });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -251,14 +239,14 @@ async function bookmarkRecipe(req, res) {
         if (isBookmark == 1) {
             const bookmarkRecipeQuery = "INSERT INTO recipe_account_save (recipe_id, account_id) values ($1,$2);"
             await db.query(bookmarkRecipeQuery, [recipeId, userId]);
-            res.status(200).json({ mess: "success", code: 200 });
+            return res.status(200).json({ mess: "success", code: 200 });
         } else {
             const unbookmarkRecipeQuery = "DELETE FROM recipe_account_save WHERE recipe_id = $1 and account_id = $2"
             await db.query(unbookmarkRecipeQuery, [recipeId, userId]);
-            res.status(200).json({ mess: "success", code: 200 });
+            return res.status(200).json({ mess: "success", code: 200 });
         }
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -300,7 +288,7 @@ async function rateRecipe(req, res) {
         return res.status(200).json({ mess: "success", code: 200 });
 
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -353,9 +341,9 @@ async function getPersonalRatingForRecipe(req, res) {
         const recipeId = req.body.recipeId;
         const queryStr = "select rating from recipe_account_rating where recipe_id = $1 and account_id = $2"
         const rows = await db.query(queryStr, [recipeId, userId]);
-        res.status(200).json({ mess: "success", code: 200, data: rows[0].rating });
+        return res.status(200).json({ mess: "success", code: 200, data: rows[0].rating });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 
@@ -382,9 +370,9 @@ async function getUserFollowingNewRecipe(req, res) {
             }
         }));
 
-        res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+        return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
     } catch (error) {
-        res.status(500).json({ mess: error.message, code: 500 });
+        return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
 

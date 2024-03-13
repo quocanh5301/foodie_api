@@ -3,7 +3,7 @@ const authenticateController = require('../controllers/authenticate');
 const router = express.Router();
 
 router.post("/logIn", authenticateController.logIn);
-router.get("/refreshToken", authenticateController.refreshToken);
-router.get("/logOut", authenticateController.logOut);
+router.post("/refreshToken", authenticateController.refreshToken);
+router.post("/logOut", authenticateController.logOut);
 
 module.exports = router;
