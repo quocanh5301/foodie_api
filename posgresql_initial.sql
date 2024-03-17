@@ -48,13 +48,14 @@ create table if not exists recipe (
 create table if not exists ingredient (
   id serial not null,
   ingredient_name varchar (50) not null,
-  ingredient_image varchar(100)
+  ingredient_image varchar(100),
+  constraint unique_user_name unique (ingredient_name)
 );
 
 create table if not exists recipe_ingredient (
   recipe_id int not null,
   ingredient_id int not null,
-  amount varchar(20) not null,
+  amount varchar(20),
   constraint pk_recipe_id_ingredient_id unique (recipe_id, ingredient_id)
 );
 

@@ -13,7 +13,7 @@ const pool = new Pool({
 exports.query = async (textQuery, params) => {
     const client = await pool.connect();
     const {rows} = await client.query(textQuery, params);
-    // console.log(rows);
+    // console.log(rows)
     client.release(true);
     return rows;
 };

@@ -21,12 +21,12 @@ const sendNotificationTo = async ( deviceTokenList, title, content ) => {
     });
 };
 
-const uploadFile = async ({ file, fileName, onSuccess, onFail }) => {
+const uploadFile = async ({ file, directory, fileName, onSuccess, onFail }) => {
   const fileBuffer = file.buffer;
-  const fileUpload = bucket.file(fileName);
+  const fileUpload = bucket.file(`${directory}/${fileName}`); // Specify directory in the file path
   const stream = fileUpload.createWriteStream({
     metadata: {
-      contentType: file.mimetype,
+      contentType: 'image/jpeg',
     },
   });
 
@@ -45,7 +45,7 @@ const getImageUrl = async (imageId) => {
   const file = bucket.file(imageId);
   const fileUrl = await file.getSignedUrl({
     action: 'read',
-    expires: Date.now() + 1000 * 60 * 10,
+    expires: Date.now() + 1000 * 60 * 120,
   });
   return fileUrl;
 };

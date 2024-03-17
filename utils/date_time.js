@@ -17,6 +17,7 @@ function currentDateDMY() {
     return today;
 }
 
+//! reassigning let won't work dumbass 3rd year me :D
 function currentDateDMY_HM() {
     let today = new Date();
 
