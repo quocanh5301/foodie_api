@@ -10,7 +10,7 @@ firebaseAdmin.initializeApp({
 
 const bucket = firebaseAdmin.storage().bucket();
 
-const sendNotificationTo = async ( deviceTokenList, title, content ) => {
+const sendNotificationTo = async (deviceTokenList, title, content) => {
   const message = {
     data: { title: title, content: content },
     tokens: deviceTokenList,
@@ -41,18 +41,9 @@ const deleteFile = async ({ fileName, onSuccess, onFail }) => {
   await bucket.file(fileName).delete().then(onSuccess).catch(onFail);
 };
 
-const getImageUrl = async (imageId) => {
-  const file = bucket.file(imageId);
-  const fileUrl = await file.getSignedUrl({
-    action: 'read',
-    expires: Date.now() + 1000 * 60 * 120,
-  });
-  return fileUrl;
-};
 
 module.exports = {
   sendNotificationTo: sendNotificationTo,
   uploadFile: uploadFile,
   deleteFile: deleteFile,
-  getImageUrl: getImageUrl,
 }

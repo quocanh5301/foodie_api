@@ -7,29 +7,16 @@ const recipeDirectory = 'recipe';
 
 async function getBookmarkList(req, res) {
     try {
+        
         const userId = req.body.userId;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const recipeQuery = "select account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from (select * from recipe order by id desc) as sort_recipe where id in (select recipe_id from recipe_account_save where account_id = $1) limit $2 offset $3"
+        console.log('userId' + userId);
+        const recipeQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from (select * from recipe order by id desc) as sort_recipe where id in (select recipe_id from recipe_account_save where account_id = $1) order by update_at desc, id desc limit $2 offset $3"
         const recipes = await db.query(recipeQuery, [userId, pageSize, pageSize * page]);
         const recipeWithImageUrl = await Promise.all(recipes.map(async (recipe) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-
-            if (recipe.recipe_image != null) {
-                const recipeImgUrl = await firebase.getImageUrl(recipe.recipe_image);
-                recipe.recipe_image = recipeImgUrl[0] ?? null;
-            } else {
-                recipe.recipe_image = null;
-            }
-
-            if (userInfo[0].user_image != null) {
-                const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-                userInfo[0].user_image = userImgUrl[0] ?? null;
-            } else {
-                userInfo[0].user_image = null;
-            }
-
 
             return { ...recipe, owner: userInfo[0] };
         }));
@@ -53,7 +40,7 @@ async function getRecipeDetail(req, res) {
 
         for (let i = 0; i < ingredients.length; i++) {
             if (ingredients[i].ingredient_image != null) {
-                const ingredientImgUrl = await firebase.getImageUrl(ingredients[i].ingredient_image);
+                const ingredientImgUrl = await firebase.getImageBase64(ingredients[i].ingredient_image);
                 ingredients[i].ingredient_image = ingredientImgUrl[0] ?? null;
             } else {
                 ingredients[i].ingredient_image = null;
@@ -61,25 +48,12 @@ async function getRecipeDetail(req, res) {
         }
 
         delete userInfo[0].user_password;
-        if (userInfo[0].user_image != null) {
-            const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-            userInfo[0].user_image = userImgUrl[0] ?? null;
-        } else {
-            userInfo[0].user_image = null;
-        }
 
         var isBookmark = 0;
         const queryCheckBookmark = "SELECT * from recipe_account_save where account_id = $1 and recipe_id = $2"
         const checkBookmark = await db.query(queryCheckBookmark, [currentUserId, recipeId]);
         if (checkBookmark.length === 1) {
             isBookmark = 1;
-        }
-
-        if (recipeDetail[0].recipe_image != null) {
-            const recipeImgUrl = await firebase.getImageUrl(recipeDetail[0].recipe_image);
-            recipeDetail[0].recipe_image = recipeImgUrl[0] ?? null;
-        } else {
-            recipeDetail[0].recipe_image = null;
         }
 
         return res.status(200).json({ mess: "success", code: 200, data: { ...recipeDetail[0], isBookmark: isBookmark, ingredients, owner: userInfo[0] } });
@@ -92,27 +66,12 @@ async function getNewRecipe(req, res) {
     try {
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const newRecipeQuery = "select account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from (select * from recipe order by id desc) as sort_recipe ORDER BY ABS(EXTRACT(EPOCH FROM create_at - CURRENT_TIMESTAMP)) DESC limit $1 offset $2"
+        const newRecipeQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from (select * from recipe order by id desc) as sort_recipe ORDER BY ABS(EXTRACT(EPOCH FROM create_at - CURRENT_TIMESTAMP)) DESC, id desc limit $1 offset $2"
         const rows = await db.query(newRecipeQuery, [pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-
-            if (recipe.recipe_image != null) {
-                const recipeImgUrl = await firebase.getImageUrl(recipe.recipe_image);
-                recipe.recipe_image = recipeImgUrl[0] ?? null;
-            } else {
-                recipe.recipe_image = null;
-            }
-
-            if (userInfo[0].user_image != null) {
-                const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-                userInfo[0].user_image = userImgUrl[0] ?? null;
-            } else {
-                userInfo[0].user_image = null;
-            }
-
 
             return { ...recipe, owner: userInfo[0] };
         }));
@@ -127,27 +86,19 @@ async function getTopRecipe(req, res) {
     try {
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const newRecipeQuery = "select account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where num_of_rating >= 4 and rating >= 3 order by (num_of_rating*rating) desc limit $1 offset $2"
+        console.log('limit' + pageSize);
+        console.log('offset' + pageSize * page - 1);
+        const newRecipeQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where num_of_rating >= 0 and rating >= 0 order by (num_of_rating*rating) desc, id desc limit $1 offset $2"
         const rows = await db.query(newRecipeQuery, [pageSize, pageSize * page]);
-
+        
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
+            try {
+                await db.query(queryUserInfo, [recipe.account_id]);
+            } catch (error) {
+                console.log('getTopRecipe error' + error)
+            }
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-
-            if (recipe.recipe_image != null) {
-                const recipeImgUrl = await firebase.getImageUrl(recipe.recipe_image);
-                recipe.recipe_image = recipeImgUrl[0] ?? null;
-            } else {
-                recipe.recipe_image = null;
-            }
-
-            if (userInfo[0].user_image != null) {
-                const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-                userInfo[0].user_image = userImgUrl[0] ?? null;
-            } else {
-                userInfo[0].user_image = null;
-            }
-
 
             return { ...recipe, owner: userInfo[0] };
         }));
@@ -163,27 +114,12 @@ async function getRecipeOfUser(req, res) {
         const userId = req.body.userId;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const newRecipeQuery = "select account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where account_id = $1 order by (num_of_rating*rating) desc limit $2 offset $3"
+        const newRecipeQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where account_id = $1 order by (num_of_rating*rating) desc, id desc limit $2 offset $3"
         const rows = await db.query(newRecipeQuery, [userId, pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(rows.map(async (recipe) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-
-            if (recipe.recipe_image != null) {
-                const recipeImgUrl = await firebase.getImageUrl(recipe.recipe_image);
-                recipe.recipe_image = recipeImgUrl[0] ?? null;
-            } else {
-                recipe.recipe_image = null;
-            }
-
-            if (userInfo[0].user_image != null) {
-                const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-                userInfo[0].user_image = userImgUrl[0] ?? null;
-            } else {
-                userInfo[0].user_image = null;
-            }
-
 
             return { ...recipe, owner: userInfo[0] };
         }));
@@ -247,7 +183,7 @@ async function createNewRecipe(req, res) {
             return await firebase.uploadFile({
                 file: file,
                 fileName: fileName,
-                directory: "test",
+                directory: recipeDirectory,
                 onSuccess: async () => {
                     if (firebaseTokens.length > 0) {
                         firebase.sendNotificationTo(
@@ -256,11 +192,6 @@ async function createNewRecipe(req, res) {
                             "New recipe has been created",
                         );
                     }
-                    // firebase.sendNotificationTo(
-                    //     firebaseTokens,
-                    //     "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
-                    //     "New recipe has been created",
-                    // );
                     return res.status(200).json({ mess: "success", code: 200 });
 
                 },
@@ -353,27 +284,12 @@ async function searchRecipeAndUser(req, res) {
         const searchKey = req.body.searchKey;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const recipeSearchQuery = "select account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where recipe_name ilike $1 limit $2 offset $3"
+        const recipeSearchQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where recipe_name ilike $1 limit $2 offset $3"
         const recipeRows = await db.query(recipeSearchQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
 
         const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-
-            if (recipe.recipe_image != null) {
-                const recipeImgUrl = await firebase.getImageUrl(recipe.recipe_image);
-                recipe.recipe_image = recipeImgUrl[0] ?? null;
-            } else {
-                recipe.recipe_image = null;
-            }
-
-            if (userInfo[0].user_image != null) {
-                const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-                userInfo[0].user_image = userImgUrl[0] ?? null;
-            } else {
-                userInfo[0].user_image = null;
-            }
-
 
             return { ...recipe, owner: userInfo[0] };
         }));
@@ -411,26 +327,11 @@ async function getUserFollowingNewRecipe(req, res) {
         const page = req.body.page;
         const pageSize = req.body.pageSize;
 
-        const getFollowingUserRecipeQuery = "select account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where account_id in (SELECT id FROM subscription_account join account on subscription_account.account_id = account.id WHERE follower_account_id = $1) order by create_at asc limit $2 offset $3";
+        const getFollowingUserRecipeQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where account_id in (SELECT id FROM subscription_account join account on subscription_account.account_id = account.id WHERE follower_account_id = $1) order by create_at desc, id desc limit $2 offset $3";
         const followingUserRecipe = await db.query(getFollowingUserRecipeQuery, [userId, pageSize, pageSize * page]);
         const recipeWithImageUrl = await Promise.all(followingUserRecipe.map(async (recipe) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
-
-            if (recipe.recipe_image != null) {
-                const recipeImgUrl = await firebase.getImageUrl(recipe.recipe_image);
-                recipe.recipe_image = recipeImgUrl[0] ?? null;
-            } else {
-                recipe.recipe_image = null;
-            }
-
-            if (userInfo[0].user_image != null) {
-                const userImgUrl = await firebase.getImageUrl(userInfo[0].user_image);
-                userInfo[0].user_image = userImgUrl[0] ?? null;
-            } else {
-                userInfo[0].user_image = null;
-            }
-
 
             return { ...recipe, owner: userInfo[0] };
         }));
@@ -442,12 +343,12 @@ async function getUserFollowingNewRecipe(req, res) {
 }
 
 module.exports = {
-    getBookmarkList: getBookmarkList,
+    getBookmarkList: getBookmarkList, //
     getRecipeDetail: getRecipeDetail,
-    getNewRecipe: getNewRecipe,
-    getTopRecipe: getTopRecipe,
+    getNewRecipe: getNewRecipe,//?
+    getTopRecipe: getTopRecipe,//?
     getRecipeOfUser: getRecipeOfUser,
-    createNewRecipe: createNewRecipe,
+    createNewRecipe: createNewRecipe,//
     bookmarkRecipe: bookmarkRecipe, //!qa unbookmark
     searchRecipeAndUser: searchRecipeAndUser,
     getPersonalRatingForRecipe: getPersonalRatingForRecipe,

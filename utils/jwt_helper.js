@@ -6,7 +6,7 @@ exports.jwtTokens = ({ id, user_name, user_email, description, update_at, join_a
     join_at = join_at.getTime();
     const user = {id, user_name, user_email, description, update_at, join_at, user_image, num_of_followers}; 
 
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1 minute' });
+    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3 hours' });
     const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '15 days' });
     return ({ accessToken, refreshToken });
 }
