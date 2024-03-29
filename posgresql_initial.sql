@@ -55,7 +55,7 @@ create table if not exists ingredient (
 create table if not exists recipe_ingredient (
   recipe_id int not null,
   ingredient_id int not null,
-  amount varchar(20),
+  quantity varchar(20),
   constraint pk_recipe_id_ingredient_id unique (recipe_id, ingredient_id)
 );
 
@@ -69,6 +69,9 @@ create table if not exists recipe_account_rating (
   recipe_id int not null,
   account_id int not null,
   rating int not null,
+  review varchar(300),
+  update_at date not null,
+  create_at date not null,
   constraint pk_recipe_id_account_id_rating unique (recipe_id, account_id)
 );
 

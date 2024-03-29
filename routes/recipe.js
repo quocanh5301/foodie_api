@@ -30,4 +30,6 @@ router.post("/rateRecipe", recipeController.rateRecipe);
 
 router.post("/getUserFollowingNewRecipe", recipeController.getUserFollowingNewRecipe);
 
+router.post("/getReviewOnRecipe", recipeController.getReviewOnRecipe);
+
 module.exports = router;

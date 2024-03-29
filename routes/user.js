@@ -23,4 +23,12 @@ router.post("/followUser", userController.followUser);
 
 router.post("/searchUser", userController.searchUser);
 
+router.post("/getUserProfile", userController.getUserProfile);
+
+router.post("/getFollowingUser", userController.getFollowingUser); //get users that followed by user with id "userId"
+
+router.post("/getFollowerUser", userController.getFollowerUser); //get users that follow this user with id "userId"
+
+router.post("/getReviewsOnUserRecipe", userController.getReviewsOnUserRecipe);
+
 module.exports = router;

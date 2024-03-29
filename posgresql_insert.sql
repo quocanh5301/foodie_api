@@ -47,8 +47,15 @@ VALUES
 (6, 2, 4), (6, 3, 3), (6, 4, 2), (6, 5, 1), (6, 6, 5),
 (7, 3, 5), (7, 4, 4), (7, 5, 3), (7, 6, 2), (7, 7, 1),
 (8, 4, 3), (8, 5, 2), (8, 6, 1), (8, 7, 5), (9, 5, 1),
-(9, 6, 5), (9, 7, 4), (10, 6, 4), (10, 7, 3), (5, 6, 5), (5, 7, 5), (6, 1, 4), (6, 7, 5), (4, 6, 4), (4, 7, 4);
+(9, 6, 5), (9, 7, 4), (10, 6, 4), (10, 7, 3), (5, 6, 5),
+(5, 7, 5), (6, 1, 4), (6, 7, 5), (4, 6, 4), (4, 7, 4);
 
+INSERT INTO recipe_account_rating (recipe_id, account_id, rating, review, update_at, create_at) 
+VALUES 
+(14, 1, 5, 'great food', '2024-03-04', '2024-03-04'), (19, 2, 4, 'nice one', '2024-03-04', '2024-03-04'), (36, 3, 3, 'nice one', '2024-03-14', '2024-03-14'), (37, 4, 2, 'good recipe', '2024-03-15', '2024-03-15'), (38, 5, 1, 'easy recipe', '2024-03-16', '2024-03-16'),
+(39, 3, 5, 'easy recipe', '2024-03-03', '2024-03-03'), (15, 4, 4, 'fast recipe', '2024-03-03', '2024-03-03'), (20, 5, 3, 'good recipe', '2024-03-13', '2024-03-13'), (13, 6, 2, 'wow, delicious', '2024-03-07', '2024-03-07'), (18, 7, 1, 'fast recipe', '2024-03-02', '2024-03-02'),
+(34, 4, 3, 'good recipe', '2024-03-01', '2024-03-01'), (35, 5, 2, 'great food', '2024-03-01', '2024-03-01'), (26, 6, 1, 'nice one', '2024-03-05', '2024-03-05'), (27, 7, 5, 'easy recipe', '2024-03-06', '2024-03-06'), (28, 5, 1, 'wow, delicious', '2024-03-08', '2024-03-08'),
+(29, 6, 5, 'fast recipe', '2024-03-09', '2024-03-09'), (30, 7, 4, 'great food', '2024-03-10', '2024-03-10'), (33, 6, 4, 'easy recipe', '2024-03-11', '2024-03-11'), (24, 7, 3, 'good recipe', '2024-03-12', '2024-03-12');
 
 -- Insert data into the ingredient table
 INSERT INTO ingredient (ingredient_name)
@@ -79,11 +86,11 @@ VALUES
 
 -- Sample data for recipe_ingredient can be generated randomly based on existing recipes and ingredients.
 -- For example:
-INSERT INTO recipe_ingredient (recipe_id, ingredient_id, amount)
+INSERT INTO recipe_ingredient (recipe_id, ingredient_id, quantity)
 SELECT 
   recipe.id AS recipe_id,
   ingredient.id AS ingredient_id,
-  CONCAT(FLOOR(RANDOM() * 10 + 1), ' cups') AS amount
+  CONCAT(FLOOR(RANDOM() * 10 + 1), ' cups') AS quantity
 FROM recipe, ingredient
 ORDER BY RANDOM()
 LIMIT 35;
@@ -91,13 +98,18 @@ LIMIT 35;
 -- Sample data for recipe_account_save can be generated randomly based on existing recipes and accounts.
 -- For example:
 INSERT INTO recipe_account_save (recipe_id, account_id)
-values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6);
+values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6), (3,11),(4,11),(5,11),(6,11),(7,11);
 
+--INSERT INTO recipe_account_save (recipe_id, account_id)
+--values (3,11),(4,11),(5,11),(6,11),(7,11),(2,11),(8,11),(9,11),(10,11);
+INSERT INTO recipe_account_save (recipe_id, account_id)
+values (24,11);
 
 -- Inserting 17 rows
 INSERT INTO subscription_account (account_id, follower_account_id)
 values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6),
 (8,9),(8,10),(10,8),(10,9),(10,1);
+
 
 -- Inserting 40 rows
 INSERT INTO recipe_account_comment (recipe_id, account_id, comment_content, update_at, parent_comment_id,num_of_reply)

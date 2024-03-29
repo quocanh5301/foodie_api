@@ -49,6 +49,67 @@ async function getProfileImage(req, res) {
     }
 }
 
+async function getUserProfile(req, res) {
+    try {
+        const userId = req.body.userId;
+        const userQuery = "SELECT  id, user_name, user_email, description, num_of_followers, update_at, join_at, user_image  FROM account WHERE id = $1";
+        const userResult = await db.query(userQuery, [userId]);
+
+        return res.status(200).json({ mess: "success", data: userResult[0], code: 200 });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
+async function getFollowingUser(req, res) { //get users that followed by user with id "userId"
+    try {
+        const userId = req.body.userId;
+        const userQuery = "select id, user_name, user_image from account  where id  in (SELECT id FROM subscription_account join account on subscription_account.account_id = account.id WHERE follower_account_id = $1)";
+        const userResult = await db.query(userQuery, [userId]);
+
+        return res.status(200).json({ mess: "success", data: userResult, code: 200 });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
+async function getFollowerUser(req, res) { //get users that follow this user with id "userId"
+    try {
+        const userId = req.body.userId;
+        const userQuery = "select id, user_name, user_image from account  where id  in (SELECT id FROM subscription_account join account on subscription_account.follower_account_id  = account.id WHERE account_id = $1)";
+        const userResult = await db.query(userQuery, [userId]);
+
+        return res.status(200).json({ mess: "success", data: userResult, code: 200 });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
+async function getReviewsOnUserRecipe(req, res) {
+    try { 
+        const userId = req.body.userId;
+        const page = req.body.page;
+        const pageSize = req.body.pageSize;
+
+        const ratingQuery = "select * from recipe_account_rating where recipe_id  in (select id from recipe where account_id = $1) order by create_at, update_at desc limit $2 offset $3";
+        const ratingResult = await db.query(ratingQuery, [userId, pageSize, pageSize * page]);
+
+        const ratingWithUserAndRecipeInfo = await Promise.all(ratingResult.map(async (rating) => {
+            const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [rating.account_id]);
+
+            const queryRecipeInfo = "SELECT recipe_name, recipe_image from recipe where id = $1"
+            const recipeInfo = await db.query(queryRecipeInfo, [rating.recipe_id]);
+
+            return { ...recipeInfo[0] ,...userInfo[0], ...rating };
+        }));
+
+        return res.status(200).json({ mess: "success", data: ratingWithUserAndRecipeInfo, code: 200 });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
 async function updateProfileImage(req, res, next) {
     try {
         const file = req.file;
@@ -184,10 +245,14 @@ async function searchUser(req, res) {
 module.exports = {
     setProfileImage: setProfileImage,
     getProfileImage: getProfileImage,
+    getUserProfile: getUserProfile,
     updateProfileImage: updateProfileImage,
     updateUserData: updateUserData,
     setFirebaseToken: setFirebaseToken,
     changeUserPassword: changeUserPassword,
     followUser: followUser, //!qa unfollowUser
     searchUser: searchUser,
+    getFollowingUser: getFollowingUser,
+    getFollowerUser: getFollowerUser,
+    getReviewsOnUserRecipe: getReviewsOnUserRecipe,
 }
