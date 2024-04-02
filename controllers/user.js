@@ -217,7 +217,7 @@ async function followUser(req, res) {
         return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
-
+ 
 async function searchUser(req, res) {
     try {
         const searchKey = req.body.searchKey;

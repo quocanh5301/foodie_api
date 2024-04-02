@@ -27,7 +27,7 @@ create table if not exists account (
   update_at date not null,
   join_at date not null,
   user_image varchar(100),
-  constraint unique_login unique (user_email, user_name)
+  constraint unique_account unique (user_email, user_name)
 );
 
 create table if not exists recipe (
@@ -49,7 +49,7 @@ create table if not exists ingredient (
   id serial not null,
   ingredient_name varchar (50) not null,
   ingredient_image varchar(100),
-  constraint unique_user_name unique (ingredient_name)
+  constraint unique_ingredient_name unique (ingredient_name)
 );
 
 create table if not exists recipe_ingredient (
@@ -68,8 +68,9 @@ create table if not exists recipe_account_save ( --user bookmark recipe table
 create table if not exists recipe_account_rating (
   recipe_id int not null,
   account_id int not null,
-  rating int not null,
+  rating NUMERIC(2, 1) not null,
   review varchar(300),
+  review_recipe_image varchar(100),
   update_at date not null,
   create_at date not null,
   constraint pk_recipe_id_account_id_rating unique (recipe_id, account_id)

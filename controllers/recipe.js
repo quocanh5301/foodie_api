@@ -4,6 +4,7 @@ const firebase = require('../utils/firebase');
 const { v4: uuidv4 } = require('uuid');
 
 const recipeDirectory = 'recipe';
+const reviewDirectory = 'review';
 
 async function getBookmarkList(req, res) {
     try {
@@ -30,7 +31,24 @@ async function getRecipeDetail(req, res) {
     try {
         const recipeId = req.body.recipeId;
         const currentUserId = req.body.userId;
+        try {
+            const queryIngredientStr = "SELECT ingredient_id, ingredient_name, ingredient_image, quantity FROM recipe JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id JOIN ingredient ON recipe_ingredient.ingredient_id = ingredient.id where recipe.id = $1 ORDER BY ingredient_id ASC"
+            const ingredients = await db.query(queryIngredientStr, [recipeId]);
+            const recipeDetail = await db.query("select * from recipe where id = $1", [recipeId]);
+            const queryUserInfo = "SELECT * from account where id = $1"
+            const userInfo = await db.query(queryUserInfo, [recipeDetail[0].account_id]);
 
+            delete userInfo[0].user_password;
+
+            var isBookmark = 0;
+            const queryCheckBookmark = "SELECT * from recipe_account_save where account_id = $1 and recipe_id = $2"
+            const checkBookmark = await db.query(queryCheckBookmark, [currentUserId, recipeId]);
+            if (checkBookmark.length === 1) {
+                isBookmark = 1;
+            }
+        } catch (error) {
+            console.log(error);
+        }
         const queryIngredientStr = "SELECT ingredient_id, ingredient_name, ingredient_image, quantity FROM recipe JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id JOIN ingredient ON recipe_ingredient.ingredient_id = ingredient.id where recipe.id = $1 ORDER BY ingredient_id ASC"
         const ingredients = await db.query(queryIngredientStr, [recipeId]);
         const recipeDetail = await db.query("select * from recipe where id = $1", [recipeId]);
@@ -38,8 +56,6 @@ async function getRecipeDetail(req, res) {
         const userInfo = await db.query(queryUserInfo, [recipeDetail[0].account_id]);
 
         delete userInfo[0].user_password;
-
-        console.log("userInfo: " + userInfo[0].update_at);
 
         var isBookmark = 0;
         const queryCheckBookmark = "SELECT * from recipe_account_save where account_id = $1 and recipe_id = $2"
@@ -185,7 +201,7 @@ async function createNewRecipe(req, res) {
                         const queryStr = "delete from recipe WHERE recipe_image = $1 and account_id = $2"
                         await db.query(queryStr, [imageID, createdUserId]);
                         await firebase.sendNotificationTo({
-                            deviceTokenList: firebaseTokens,
+                            firebaseTokens,
                             title: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
                             body: "New recipe has been created",
                         });
@@ -229,16 +245,21 @@ async function rateRecipe(req, res) {
         const rating = req.body.rating;
         const review = req.body.review;
         const currentDate = dateTime.currentDateDMY_HM()
+
+        const file = req.file;
+
+        const imageID = uuidv4();
+        const fileName = imageID;
+
         const checkRatingQuery = "select recipe_id from recipe_account_rating where recipe_id = $1 and account_id = $2"
         const existed = await db.query(checkRatingQuery, [recipeId, userId]);
-        if (existed[0].count == 1) {
+        if (existed.length == 1) {
             const updateRatingQuery = "update recipe_account_rating set rating = $1, review = $2, update_at = $3 where recipe_id = $4 and account_id = $5"
             await db.query(updateRatingQuery, [rating, review, currentDate, recipeId, userId]);
         } else {
             const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, rating, review, create_at, update_at) values ($1, $2, $3, $4, $5, $6)"
-            await db.query(insertRatingQuery, [recipeId, review, userId, rating, review, currentDate, currentDate]);
+            await db.query(insertRatingQuery, [recipeId, userId, rating, review, currentDate, currentDate]);
         }
-
         const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token join recipe on firebase_messaging_token.account_id = recipe.account_id  where recipe.id = $1";
         const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [recipeId]);
         const firebaseTokens = getFirebaseTokenResult.map((item) => {
@@ -250,12 +271,45 @@ async function rateRecipe(req, res) {
 
         const recipeNameQuery = "select recipe_name from recipe where id = $1"
         const recipeName = await db.query(recipeNameQuery, [recipeId]);
-        if (firebaseTokens.length > 0) {
-            firebase.sendNotificationTo(
-                firebaseTokens,
-                "New Rating !!!",
-                "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
-            );
+
+        if (file != null) {
+            if (existed.length == 1) {
+                const updateRatingQuery = "update recipe_account_rating set review_recipe_image = $1 where recipe_id = $2 and account_id = $3"
+                await db.query(updateRatingQuery, [`${reviewDirectory}/${fileName}`, recipeId, userId]);
+            } else {
+                const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, review_recipe_image) values ($1, $2, $3)"
+                await db.query(insertRatingQuery, [recipeId, userId,`${reviewDirectory}/${fileName}`]);
+            }
+            return await firebase.uploadFile({
+                file: file,
+                fileName: fileName,
+                directory: reviewDirectory,
+                onSuccess: async () => {
+                    if (firebaseTokens.length > 0) {
+                        await firebase.sendNotificationTo(
+                            firebaseTokens,
+                            "New Rating !!!",
+                            "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
+                        );
+                    }
+                    return res.status(200).json({ mess: "success", code: 200 });
+
+                },
+                onFail: async (err) => {
+                    try {
+                        const queryStr = "delete from recipe WHERE recipe_image = $1 and account_id = $2"
+                        await db.query(queryStr, [imageID, createdUserId]);
+                        await firebase.sendNotificationTo(
+                            firebaseTokens,
+                            "New Rating !!!",
+                            "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
+                        );
+                        return res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
+                    } catch (error) {
+                        return res.status(500).json({ mess: 'fail to insert recipe data, upload recipe image to firebase and removing wrong data' + err + 'and ' + error, code: 500 });
+                    }
+                },
+            });
         }
 
         return res.status(200).json({ mess: "success", code: 200 });
@@ -297,8 +351,11 @@ async function getPersonalRatingForRecipe(req, res) {
     try {
         const userId = req.body.userId;
         const recipeId = req.body.recipeId;
-        const queryStr = "select rating, review, update_at, create_at from recipe_account_rating where recipe_id = $1 and account_id = $2"
+        const queryStr = "select rating, review, update_at, create_at, review_recipe_image from recipe_account_rating where recipe_id = $1 and account_id = $2"
         const rows = await db.query(queryStr, [recipeId, userId]);
+        if (rows.length != 0) {
+            rows[0].rating = parseFloat(rows[0].rating)
+        }
         return res.status(200).json({ mess: "success", code: 200, data: rows[0] });
     } catch (error) {
         return res.status(500).json({ mess: error.message, code: 500 });
@@ -333,13 +390,19 @@ async function getReviewOnRecipe(req, res) {
         const recipeId = req.body.recipeId;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const getReviewQuery = "select * from recipe_account_rating where recipe_id = $1 order by create_at, update_at desc limit $2 offset $3"
+
+        const getReviewQuery = "select * from recipe_account_rating where recipe_id = $1 order by update_at desc limit $2 offset $3"
         const reviewRows = await db.query(getReviewQuery, [recipeId, pageSize, pageSize * page]);
+        console.log(reviewRows);
         const reviewWithUserInfo = await Promise.all(reviewRows.map(async (review) => {
-            const queryUserInfo = "SELECT id, user_image, user_name from account where id = $1"
+            const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [review.account_id]);
 
-            return { ...review, owner: userInfo[0] };
+            const queryRecipeInfo = "SELECT recipe_name, recipe_image from recipe where id = $1"
+            const recipeInfo = await db.query(queryRecipeInfo, [review.recipe_id]);
+            review.rating = parseFloat(review.rating)
+
+            return { ...recipeInfo[0], ...userInfo[0], ...review };
         }));
 
         return res.status(200).json({ mess: "success", code: 200, data: reviewWithUserInfo });
@@ -347,6 +410,8 @@ async function getReviewOnRecipe(req, res) {
         return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
+
+
 
 module.exports = {
     getBookmarkList: getBookmarkList, //

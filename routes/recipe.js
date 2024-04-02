@@ -26,7 +26,7 @@ router.post("/searchRecipeAndUser", recipeController.searchRecipeAndUser);
 
 router.post("/getPersonalRatingForRecipe", recipeController.getPersonalRatingForRecipe);
 
-router.post("/rateRecipe", recipeController.rateRecipe);
+router.post("/rateRecipe", upload.single('reviewRecipeImage'), recipeController.rateRecipe);
 
 router.post("/getUserFollowingNewRecipe", recipeController.getUserFollowingNewRecipe);
 
