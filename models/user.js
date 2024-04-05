@@ -76,9 +76,3 @@ module.exports = class User {
     this._user_image = value;
   }
 }
-
-// const userQuery = "select * from account";
-// const rows = await db.query(userQuery, []);
-// const userData = rows[0]; // Assuming the first row contains the user data
-// const user = new User(userData);
-// console.log(user);

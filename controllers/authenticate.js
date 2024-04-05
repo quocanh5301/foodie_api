@@ -29,7 +29,6 @@ async function refreshToken(req, res) {
     try {
         const userEmail = req.body.userEmail;
         const refreshToken = req.body.refreshToken; //Bearer TOKEN
-        console.log("refreshToken: " + refreshToken);
         if (refreshToken === null) return res.sendStatus(401);
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (error, user) => {
             if (error) return res.status(500).json({ mess: error.message, code: 500 });

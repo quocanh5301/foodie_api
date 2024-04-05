@@ -211,8 +211,18 @@ async function createNewRecipe(req, res) {
                     }
                 },
             });
+        } else {
+            try {
+                await firebase.sendNotificationTo(
+                    firebaseTokens,
+                    "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                    "New recipe has been created",
+                );
+            } catch (error) {
+                console.log("error when send notification to " + firebaseTokens + " because " + error.message);
+            }
+            return res.status(200).json({ mess: "success", code: 200 });
         }
-        return res.status(200).json({ mess: "success", code: 200 });
 
     } catch (error) {
         return res.status(500).json({ mess: error.message, code: 500 });
@@ -278,7 +288,7 @@ async function rateRecipe(req, res) {
                 await db.query(updateRatingQuery, [`${reviewDirectory}/${fileName}`, recipeId, userId]);
             } else {
                 const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, review_recipe_image) values ($1, $2, $3)"
-                await db.query(insertRatingQuery, [recipeId, userId,`${reviewDirectory}/${fileName}`]);
+                await db.query(insertRatingQuery, [recipeId, userId, `${reviewDirectory}/${fileName}`]);
             }
             return await firebase.uploadFile({
                 file: file,
@@ -393,7 +403,6 @@ async function getReviewOnRecipe(req, res) {
 
         const getReviewQuery = "select * from recipe_account_rating where recipe_id = $1 order by update_at desc limit $2 offset $3"
         const reviewRows = await db.query(getReviewQuery, [recipeId, pageSize, pageSize * page]);
-        console.log(reviewRows);
         const reviewWithUserInfo = await Promise.all(reviewRows.map(async (review) => {
             const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
             const userInfo = await db.query(queryUserInfo, [review.account_id]);
