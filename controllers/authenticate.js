@@ -54,7 +54,9 @@ async function logOut(req, res) {
         if (accessToken === null) return res.sendStatus(401);
         jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, async (error, user) => {
             if (error) return res.status(500).json({ mess: error.message, code: 500 });
-
+            if (user.user_email !== email) return res.status(401).json({ mess: "Email is incorrect", code: 401 });
+            if (user.id != userId) return res.status(401).json({ mess: "User ID is incorrect", code: 401 });
+            
             await db.query('delete from firebase_messaging_token WHERE account_id = $1 or firebase_token = $2', [userId, firebaseToken]);
             await db.query("delete from account_login_status WHERE user_email = $1", [email]);
             return res.status(200).json({ mess: "success", code: 200 });

@@ -31,4 +31,6 @@ router.post("/getFollowerUser", userController.getFollowerUser); //get users tha
 
 router.post("/getReviewsOnUserRecipe", userController.getReviewsOnUserRecipe);
 
+router.post("/checkIsFollowOrNot", userController.checkIsFollowOrNot);
+
 module.exports = router;

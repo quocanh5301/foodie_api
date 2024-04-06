@@ -4,6 +4,7 @@ const db = require('../data/db');
 const e = require('express');
 const bcrypt = require('bcrypt');
 const dateTime = require('../utils/date_time');
+const userDirectory = 'user';
 
 
 async function setProfileImage(req, res) {
@@ -118,36 +119,38 @@ async function updateProfileImage(req, res, next) {
 
         const userQuery = "SELECT user_image FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [userId]);
-        const existingImageID = userResult[0].image;
+        const existingImageID = userResult[0].user_image;
+
         //Delete the existing image from Firebase Storage
-        if (existingImageID) {
-            await firebase.deleteFile({
+        if (existingImageID != null) {
+            await firebase.deleteFile({//!qa buggggggg
                 fileName: existingImageID,
                 onSuccess: () => { console.log('File deleted successfully.'); },
                 onFail: (err) => { console.error('Error deleting file:', err); }
             });
         }
         // Upload the new image with the same image ID
+        const newImageID = uuidv4();
         await firebase.uploadFile({
             file: file,
-            fileName: existingImageID,
+            fileName: newImageID,
+            directory: userDirectory,
             onSuccess: async () => {
                 try {
                     // Update the user's record in your database with the new image ID
-                    const queryStr = "UPDATE account SET image = $1 WHERE id = $2";
-                    await db.query(queryStr, [existingImageID, userId]);
+                    const queryStr = "UPDATE account SET user_image = $1 WHERE id = $2";
+                    await db.query(queryStr, [`${userDirectory}/${newImageID}`, userId]);
                 } catch (error) {
-                    console.error('Error updating user record:', error);
                     return res.status(500).json({ mess: 'Error updating user record', code: 500 });
                 }
                 return res.status(200).json({ mess: 'success', code: 200 });
             },
             onFail: (err) => {
-                console.error('Error uploading to Firebase Storage:', err);
-                return res.status(500).json({ mess: 'Error uploading to Firebase Storage', code: 500 });
+                return res.status(500).json({ mess: 'Error uploading to Firebase Storage: ' + err, code: 500 });
             },
         });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
@@ -175,7 +178,7 @@ async function changeUserPassword(req, res) {
         const userQuery = "SELECT user_password FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [userId]);
         const validPassword = await bcrypt.compare(oldPassword, userResult[0].user_password);
-        if (!validPassword) return res.status(401).json({ mess: "Incorrect old password", code: 401 });
+        if (!validPassword) return res.status(200).json({ mess: "Incorrect old password", code: 200 });
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         const updateUserQuery = "UPDATE account SET user_password = $1, update_at = $2 WHERE id = $3";
         await db.query(updateUserQuery, [hashedPassword, dateTime.currentDateDMY_HM(), userId]);
@@ -245,6 +248,22 @@ async function searchUser(req, res) {
     }
 }
 
+async function checkIsFollowOrNot(req, res) { //get users that follow this user with id "userId"
+    try {
+        const userId = req.body.userId; //this user
+        const toUserId = req.body.toUserId; //follow this user or not?
+        const userQuery = "select * from subscription_account where account_id = $1 and follower_account_id = $2";
+        const userResult = await db.query(userQuery, [toUserId, userId]);
+        if (userResult.length != 0) {
+            return res.status(200).json({ mess: "success", code: 200, data: true });
+        } else {
+            return res.status(200).json({ mess: "success", code: 200, data: false });
+        }
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
+
 module.exports = {
     setProfileImage: setProfileImage,
     getProfileImage: getProfileImage,
@@ -258,4 +277,5 @@ module.exports = {
     getFollowingUser: getFollowingUser,
     getFollowerUser: getFollowerUser,
     getReviewsOnUserRecipe: getReviewsOnUserRecipe,
+    checkIsFollowOrNot: checkIsFollowOrNot,
 }
