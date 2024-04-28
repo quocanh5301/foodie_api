@@ -23,7 +23,7 @@ create table if not exists account (
   user_email varchar (100) not null,
   user_password varchar (150) not null,
   description varchar (100),
-  num_of_followers int not null, --number of user followed this user
+  num_of_followers int not null, --number of user followed this user (need?)
   update_at date not null,
   join_at date not null,
   user_image varchar(100),
@@ -37,7 +37,7 @@ create table if not exists recipe (
   description text,
   instruction text,
   rating float not null,
-  num_of_followers int not null, --number of user bookmarked this recipe
+  num_of_followers int not null, --number of user bookmarked this recipe (need?)
   num_of_rating int not null,
   num_of_comments int not null,
   update_at date not null,
@@ -48,8 +48,7 @@ create table if not exists recipe (
 create table if not exists ingredient (
   id serial not null,
   ingredient_name varchar (50) not null,
-  ingredient_image varchar(100),
-  constraint unique_ingredient_name unique (ingredient_name)
+  ingredient_image varchar(100)
 );
 
 create table if not exists recipe_ingredient (
@@ -90,6 +89,7 @@ create table if not exists recipe_account_comment (
   comment_content TEXT not null,
   update_at date not null,
   num_of_reply int not null,
+  num_of_like int not null,
   parent_comment_id int
 );
 

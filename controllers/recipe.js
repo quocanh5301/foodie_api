@@ -426,7 +426,7 @@ module.exports = {
     getBookmarkList: getBookmarkList, //
     getRecipeDetail: getRecipeDetail,
     getNewRecipe: getNewRecipe,//?
-    getTopRecipe: getTopRecipe,//?
+    getTopRecipe: getTopRecipe,
     getRecipeOfUser: getRecipeOfUser,
     createNewRecipe: createNewRecipe,//
     bookmarkRecipe: bookmarkRecipe, //!qa unbookmark

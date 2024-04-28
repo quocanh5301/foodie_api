@@ -33,4 +33,5 @@ router.post("/getReviewsOnUserRecipe", userController.getReviewsOnUserRecipe);
 
 router.post("/checkIsFollowOrNot", userController.checkIsFollowOrNot);
 
+router.post("/getRecipeNumFollowerFollowing", userController.getRecipeNumFollowerFollowing);
 module.exports = router;

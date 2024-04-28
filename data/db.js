@@ -11,8 +11,12 @@ const pool = new Pool({
 });
 
 exports.query = async (textQuery, params) => {
-    const client = await pool.connect();
-    const {rows} = await client.query(textQuery, params);
-    client.release(true);
-    return rows;
+    try {
+        const client = await pool.connect();
+        const {rows} = await client.query(textQuery, params);
+        client.release(true);
+        return rows;
+    } catch (error) {
+        console.log(error);
+    }
 };

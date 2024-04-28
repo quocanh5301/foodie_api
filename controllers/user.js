@@ -51,7 +51,7 @@ async function getProfileImage(req, res) {
 
 async function getUserProfile(req, res) {
     try {
-        const userId = req.body.userId;
+        const userId = req.body.userId; //!qa num follower needed?
         const userQuery = "SELECT  id, user_name, user_email, description, num_of_followers, update_at, join_at, user_image  FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [userId]);
         userResult[0].update_at = new Date(userResult[0].update_at).getTime();
@@ -264,6 +264,25 @@ async function checkIsFollowOrNot(req, res) { //get users that follow this user 
     }
 }
 
+async function getRecipeNumFollowerFollowing(req, res) {//!qa
+    try {
+        const userId = req.body.userId;
+        const followerQuery = "select count(*) from subscription_account where account_id = $1";
+        const followerResult = await db.query(followerQuery, [userId]);
+
+        const followingQuery = "select count(*) from subscription_account where follower_account_id = $1";
+        const followingResult = await db.query(followingQuery, [userId]);
+
+        const recipeNumQuery = "select count(*) from recipe where account_id = $1";
+        const recipeNumResult = await db.query(recipeNumQuery, [userId]); //!qa get recipe num
+
+        return res.status(200).json({ mess: "success", code: 200, data: { numFollower: followerResult[0].count, numFollowing: followingResult[0].count, numRecipe: recipeNumResult[0].count, } });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+
+}
+
 module.exports = {
     setProfileImage: setProfileImage,
     getProfileImage: getProfileImage,
@@ -277,5 +296,6 @@ module.exports = {
     getFollowingUser: getFollowingUser,
     getFollowerUser: getFollowerUser,
     getReviewsOnUserRecipe: getReviewsOnUserRecipe,
-    checkIsFollowOrNot: checkIsFollowOrNot,
+    checkIsFollowOrNot: checkIsFollowOrNot,//!qa gộp với "getNumRecipeFollowerFollowing"?
+    getRecipeNumFollowerFollowing: getRecipeNumFollowerFollowing, //!qa
 }

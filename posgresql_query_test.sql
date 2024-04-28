@@ -35,6 +35,7 @@ SELECT ingredient_id, ingredient_name, ingredient_image, amount FROM recipe JOIN
 
 --get bookmark recipe of user with id 5
 select * from recipe where id in (select recipe_id from recipe_account_save where account_id = 5) limit 2 offset 2;
+insert into account (user_image) values (hehe) where id = 1;
 insert into subscription_account (account_id, follower_account_id) values (11, 10);
 
 update account set user_image = 'af8b0721-d35d-4265-968f-8447ae3atiqa.jpeg' where id = 11;
@@ -45,7 +46,7 @@ select recipe_id from recipe_account_save where account_id = 5;
 
 update account set user_image = 'test/409109404_957680309062858_6882892167285190303_n.jpg', user_name = 'hehe' where user_name = 'JaneSmith';
 
-update recipe set recipe_image = '424992880_435046962204108_5280980655528045169_n.jpg' where id = 1;
+update recipe set recipe_image = null where id = 39;
 update firebase_messaging_token set firebase_token = 'eStAFn1oQumhFbq5jKq2b4:APA91bEA_DMzlTVL6QBMtufI8LT6J_0Deftxzy-7uezp1L20zQ_zLwBgz7SywbpJq-rmMNJwi3Po3jExyaYSaYIFC7RuSbFQsFhdMUklC29I4t2-A8ZwyIeKpd9jMnKyjRFF2Bf8yYaL' where account_id = 10;
 
 select * from (select * from recipe order by id desc) as sort_recipe ORDER BY ABS(EXTRACT(EPOCH FROM create_at - CURRENT_TIMESTAMP)) DESC limit 3 offset 0;
@@ -88,7 +89,7 @@ select id from recipe where account_id = 4;
 
 select * from recipe_account_rating where recipe_id  in (select id from recipe where account_id = 9) order by create_at, update_at desc limit 20 offset 0;
 
-select * from recipe where account_id = 11;
+select recipe_name from recipe where account_id = 10;
 
 select * from recipe_account_rating where recipe_id = 19 order by create_at, update_at desc limit 20 offset 0;
 
