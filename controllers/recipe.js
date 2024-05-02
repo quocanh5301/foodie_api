@@ -334,24 +334,23 @@ async function searchRecipeAndUser(req, res) {
         const searchKey = req.body.searchKey;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
-        const recipeSearchQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where recipe_name ilike $1 limit $2 offset $3"
-        const recipeRows = await db.query(recipeSearchQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
+        const isRecipe = req.body.isRecipe;
 
-        const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
-            const queryUserInfo = "SELECT id, user_image, user_name from account where id = $1"
-            const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
+        if (isRecipe == 1) {
+            const recipeSearchQuery = "select id, account_id, recipe_name, recipe_image, create_at, update_at, num_of_comments, num_of_rating, num_of_followers, rating from recipe where recipe_name ilike $1 limit $2 offset $3"
+            const recipeRows = await db.query(recipeSearchQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
+            const recipeWithImageUrl = await Promise.all(recipeRows.map(async (recipe) => {
+                const queryUserInfo = "SELECT user_image, user_name from account where id = $1"
+                const userInfo = await db.query(queryUserInfo, [recipe.account_id]);
 
-            return { ...recipe, owner: userInfo[0] };
-        }));
-
-        if (page == 0) {
-            const userSearchQuery = "select user_image, user_name from account where user_name ilike $1 order by id asc limit $2";
+                return { ...recipe, owner: userInfo[0] };
+            }));
+            return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
+        } else {
+            const userSearchQuery = "select id, user_image, user_name, user_email from account where user_name ilike $1 order by id asc limit $2";
             const userRows = await db.query(userSearchQuery, [`%${searchKey}%`, pageSize]);
-            return res.status(200).json({ mess: "success", code: 200, data: { recipe: recipeWithImageUrl, user: userRows } });
+            return res.status(200).json({ mess: "success", code: 200, data: userRows });
         }
-
-        return res.status(200).json({ mess: "success", code: 200, data: { recipe: recipeWithImageUrl } });
-
     } catch (error) {
         return res.status(500).json({ mess: error.message, code: 500 });
     }
