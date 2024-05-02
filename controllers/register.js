@@ -19,7 +19,6 @@ async function registerAccount(req, res){
         await mailer.sendVerificationEmail(req.body.email, "http://localhost:3000/register/confirmRegistration?email=" + req.body.email);
         res.status(200).json({mess: "success",  code : 200});
     } catch (error) {
-        console.log(error)
         res.status(401).json({mess: error + " Please contact a@gmail.com to report",  code : 401});
     }
 }
@@ -38,7 +37,7 @@ async function confirmEmail(req, res){
 
     res.status(200).json({mess: "success",  code : 200});
     } catch (error) {
-        res.status(401).json({mess: error + "\nPlease contact a@gmail.com to report",  code : 401});
+        res.status(401).json({mess: error + "\nPlease contact quocanhphan5301@gmail.com to report",  code : 401});
     }
 }
 

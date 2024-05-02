@@ -97,13 +97,26 @@ create table if not exists notification (
   id serial primary key,
   title varchar(50) not null,
   notification_content varchar(100) not null,
-  create_at date not null
+  notification_image varchar(50),
+  on_click_type notification_type not null, --type of noti
+  relevant_data int not null, --*
+  create_at date not null,
+  constraint pk_notification unique (title, notification_content)
 );
+-- người bạn theo dõi thêm recipe (relevant_data gửi id recipe),
+-- bạn có người theo dõi mới (relevant_data gửi id user),
+-- recipe bạn bookmark có đánh giá mới (relevant_data gửi id recipe),
+-- recipe của bạn có đánh giá mới (relevant_data gửi id recipe)
 
 create table if not exists notification_to_account (
   notification_id int not null,
   account_id int not null,
   is_seen int not null
+);
+
+create type notification_type as enum (
+  'user',
+  'recipe'
 );
 
 CREATE INDEX idx_notification_id ON notification_to_account (notification_id);

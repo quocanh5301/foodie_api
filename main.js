@@ -17,15 +17,11 @@ const recipeRoutes = require('./routes/recipe');
 const userRoutes = require('./routes/user');
 const registerRoutes = require('./routes/register');
 const authenticateRoutes = require('./routes/authenticate');
+const notificationRoutes = require('./routes/notification');
 
-app.use('/user',
-  authenticateToken,
-  userRoutes);
-
-app.use('/recipe',
-  authenticateToken,
-  recipeRoutes);
-
+app.use('/user', authenticateToken, userRoutes);
+app.use('/recipe', authenticateToken, recipeRoutes);
+app.use('/notification', authenticateToken, notificationRoutes);
 app.use('/register', registerRoutes);
 app.use('/authenticate', authenticateRoutes);
 app.listen(3000);

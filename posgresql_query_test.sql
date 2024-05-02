@@ -11,6 +11,8 @@ select * from recipe_ingredient;
 select * from register_account;
 select * from subscription_account;
 select * from account_login_status;
+select * from notification;
+select * from notification_to_account;
 
 
  

@@ -20,4 +20,8 @@ DROP TABLE IF EXISTS subscription_account;
 
 DROP TABLE IF EXISTS recipe_account_comment;
 
+DROP TABLE IF EXISTS notification;
+
+DROP TABLE IF EXISTS notification_to_account;
+
 

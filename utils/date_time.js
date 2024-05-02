@@ -1,21 +1,21 @@
-function currentDateDMY() {
-    let today = new Date();
+// function currentDateDMY() {
+//     let today = new Date();
 
-    let dd = today.getDate();
-    let mm = today.getMonth() + 1;
+//     let dd = today.getDate();
+//     let mm = today.getMonth() + 1;
 
-    let yyyy = today.getFullYear();
+//     let yyyy = today.getFullYear();
 
-    if (dd < 10) {
-        dd = '0' + dd;
-    }
-    if (mm < 10) {
-        mm = '0' + mm;
-    }
-    today = yyyy + '/' + mm + '/' + dd;
+//     if (dd < 10) {
+//         dd = '0' + dd;
+//     }
+//     if (mm < 10) {
+//         mm = '0' + mm;
+//     }
+//     today = yyyy + '/' + mm + '/' + dd;
 
-    return today;
-}
+//     return today;
+// }
 
 //! reassigning let won't work dumbass 3rd year me :D
 function currentDateDMY_HM() {
@@ -34,13 +34,24 @@ function currentDateDMY_HM() {
     if (mm < 10) {
         mm = '0' + mm;
     }
-    today = yyyy + '/' + mm + '/' + dd + ' ' + hh + ':' + min + ':' + sec;
+    // if (hh < 10) {
+    //     hh = '0' + hh;
+    // }
+    // if (min < 10) {
+    //     min = '0' + min;
+    // }
+    // if (sec < 10) {
+    //     sec = '0' + sec;
+    // }
+    // todayDate = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + sec;
 
-    return today;
+    todayDate = yyyy + '-' + mm + '-' + dd;
+
+    return todayDate;
 }
 
 module.exports = {
-    currentDateDMY : currentDateDMY, 
+    // currentDateDMY : currentDateDMY, 
     currentDateDMY_HM : currentDateDMY_HM,
     //!qa
 }

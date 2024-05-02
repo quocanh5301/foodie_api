@@ -8,7 +8,6 @@ const reviewDirectory = 'review';
 
 async function getBookmarkList(req, res) {
     try {
-
         const userId = req.body.userId;
         const page = req.body.page;
         const pageSize = req.body.pageSize;
@@ -147,9 +146,9 @@ async function createNewRecipe(req, res) {
         const currentDate = dateTime.currentDateDMY_HM()
 
         //insert recipe info
-        const recipeQuery = "insert into recipe (account_id, recipe_name, description, instruction, rating, num_of_followers, num_of_rating, num_of_comments, update_at, create_at, recipe_image) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
-        await db.query(recipeQuery, [createdUserId, recipeName, recipeDescription, recipeInstruction, 0, 0, 0, 0, currentDate, currentDate, `${recipeDirectory}/${fileName}`]); //test/ is the folder name in Firebase Storage
-
+        const recipeQuery = "insert into recipe (account_id, recipe_name, description, instruction, rating, num_of_followers, num_of_rating, num_of_comments, update_at, create_at, recipe_image) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;"
+        const recipeId = await db.query(recipeQuery, [createdUserId, recipeName, recipeDescription, recipeInstruction, 0, 0, 0, 0, currentDate, currentDate, `${recipeDirectory}/${fileName}`]); //test/ is the folder name in Firebase Storage
+        console.log(recipeId);
 
         for (let i = 0; i < ingredients.length; i++) {
             //insert ingredients of this recipe
@@ -169,8 +168,6 @@ async function createNewRecipe(req, res) {
             await db.query(ingredientRecipeQuery, [recipeId[0].id, ingredientId[0].id, ingredients[i].quantity]);
         }
 
-
-
         const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token join subscription_account on firebase_messaging_token.account_id = subscription_account.follower_account_id where subscription_account.account_id = $1";
         const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [createdUserId]);
         const firebaseTokens = getFirebaseTokenResult.map((item) => {
@@ -180,6 +177,22 @@ async function createNewRecipe(req, res) {
         const userQuery = "SELECT user_name FROM account WHERE id = $1";
         const userResult = await db.query(userQuery, [createdUserId]);
 
+        //insert notification without image 
+        const followNotiQuery = "INSERT INTO notification (title, notification_content, on_click_type, relevant_data, create_at) values ($1,$2,$3,$4,$5) on conflict (title, notification_content) do nothing;"
+        await db.query(followNotiQuery, ["New recipe has been created", "New recipe " + recipeName + " has been created by " + userResult[0].user_name, 'recipe', recipeId[0].id, currentDate]);
+        //get list of following users's id
+        const followingUserQuery = "SELECT follower_account_id FROM subscription_account WHERE account_id = $1";
+        const followingUsersId = await db.query(followingUserQuery, [createdUserId]);
+        //insert notification-users relation (1-many)
+        const notiIdQuery = "select id from notification where notification_content = $1 and title = $2"
+        const notiId = await db.query(notiIdQuery, ["New recipe " + recipeName + " has been created by " + userResult[0].user_name, "New recipe has been created"]);
+        for (let index = 0; index < followingUsersId.length; index++) {
+            const userId = followingUsersId[index];
+            const notiToAccountQuery = "INSERT INTO notification_to_account (notification_id, account_id, is_seen) values ($1,$2,$3);"
+            await db.query(notiToAccountQuery, [notiId[0].id, userId.follower_account_id, 0]);
+        }
+
+        //upload recipe image to firebase, delete recipe data if fail, then send notification
         if (file != null) {
             return await firebase.uploadFile({
                 file: file,
@@ -189,8 +202,8 @@ async function createNewRecipe(req, res) {
                     if (firebaseTokens.length > 0) {
                         firebase.sendNotificationTo(
                             firebaseTokens,
-                            "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
                             "New recipe has been created",
+                            "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
                         );
                     }
                     return res.status(200).json({ mess: "success", code: 200 });
@@ -213,6 +226,7 @@ async function createNewRecipe(req, res) {
             });
         } else {
             try {
+                //alter recipe image name if file is null
                 await firebase.sendNotificationTo(
                     firebaseTokens,
                     "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
@@ -255,7 +269,7 @@ async function rateRecipe(req, res) {
         const rating = req.body.rating;
         const review = req.body.review;
         const currentDate = dateTime.currentDateDMY_HM()
-
+        console.log(currentDate);
         const file = req.file;
 
         const imageID = uuidv4();
@@ -276,13 +290,24 @@ async function rateRecipe(req, res) {
             return item.firebase_token;
         });
 
+
         const userNameQuery = "select user_name from account where id = $1"
         const userName = await db.query(userNameQuery, [userId]);
 
-        const recipeNameQuery = "select recipe_name from recipe where id = $1"
+        const recipeNameQuery = "select recipe_name, recipe_image, account_id from recipe where id = $1"
         const recipeName = await db.query(recipeNameQuery, [recipeId]);
 
+        //insert notification
+        const followNotiQuery = "INSERT INTO notification (title, notification_content, notification_image, on_click_type, relevant_data, create_at) values ($1,$2,$3,$4,$5,$6) on conflict (title, notification_content) do nothing;"
+        await db.query(followNotiQuery, ["New Rating !!!", "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review, recipeName[0].recipe_image, 'recipe', recipeId, currentDate]);
+        //insert notification-user relation
+        const notiIdQuery = "select id from notification where notification_content = $1 and title = $2"
+        const notiId = await db.query(notiIdQuery, ["User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review, "New Rating !!!"]);
+        const notiToAccountQuery = "INSERT INTO notification_to_account (notification_id, account_id, is_seen) values ($1,$2,$3);"
+        await db.query(notiToAccountQuery, [notiId[0].id, recipeName[0].account_id, 0]);
+
         if (file != null) {
+            //insert review image name into table
             if (existed.length == 1) {
                 const updateRatingQuery = "update recipe_account_rating set review_recipe_image = $1 where recipe_id = $2 and account_id = $3"
                 await db.query(updateRatingQuery, [`${reviewDirectory}/${fileName}`, recipeId, userId]);
@@ -290,6 +315,8 @@ async function rateRecipe(req, res) {
                 const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, review_recipe_image) values ($1, $2, $3)"
                 await db.query(insertRatingQuery, [recipeId, userId, `${reviewDirectory}/${fileName}`]);
             }
+
+            //upload review image to firebase
             return await firebase.uploadFile({
                 file: file,
                 fileName: fileName,
@@ -303,7 +330,6 @@ async function rateRecipe(req, res) {
                         );
                     }
                     return res.status(200).json({ mess: "success", code: 200 });
-
                 },
                 onFail: async (err) => {
                     try {
