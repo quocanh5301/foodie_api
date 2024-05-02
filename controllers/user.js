@@ -216,13 +216,15 @@ async function followUser(req, res) {
             //follow user when isFollow = 1
             const followUserQuery = "INSERT INTO subscription_account (account_id, follower_account_id) values ($1,$2);"
             await db.query(followUserQuery, [userId, followerUserId]);
-            
-            //sent notification to followed user
+
+            //get firebase token for notification messaging
             const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token where account_id = $1";
             const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [userId]);
             const firebaseTokens = getFirebaseTokenResult.map((item) => {
                 return item.firebase_token;
             });
+            
+            //sent notification to followed user
             if (firebaseTokens.length > 0) {
                 await firebase.sendNotificationTo(
                     firebaseTokens,
@@ -235,7 +237,7 @@ async function followUser(req, res) {
             await db.query(followNotiQuery, ["New Follower !!!", "User " + followerUserName + " started following you :D", followerUserImage, 'user', followerUserId, dateTime.currentDateDMY_HM()]);
             //insert notification to account relation
             const notiIdQuery = "select id from notification where notification_content = $1 and title = $2"
-            const notiId = await db.query(notiIdQuery, ["User " + followerUserName + " started following you :D", "New Follower !!!"]); 
+            const notiId = await db.query(notiIdQuery, ["User " + followerUserName + " started following you :D", "New Follower !!!"]);
             const notiToAccountQuery = "INSERT INTO notification_to_account (notification_id, account_id, is_seen) values ($1,$2,$3);"
             await db.query(notiToAccountQuery, [notiId[0].id, userId, 0]);
 

@@ -34,18 +34,16 @@ function currentDateDMY_HM() {
     if (mm < 10) {
         mm = '0' + mm;
     }
-    // if (hh < 10) {
-    //     hh = '0' + hh;
-    // }
-    // if (min < 10) {
-    //     min = '0' + min;
-    // }
-    // if (sec < 10) {
-    //     sec = '0' + sec;
-    // }
-    // todayDate = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + sec;
-
-    todayDate = yyyy + '-' + mm + '-' + dd;
+    if (hh < 10) {
+        hh = '0' + hh;
+    }
+    if (min < 10) {
+        min = '0' + min;
+    }
+    if (sec < 10) {
+        sec = '0' + sec;
+    }
+    todayDate = yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + sec;
 
     return todayDate;
 }

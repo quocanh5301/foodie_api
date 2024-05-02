@@ -24,8 +24,8 @@ create table if not exists account (
   user_password varchar (150) not null,
   description varchar (100),
   num_of_followers int not null, --number of user followed this user (need?)
-  update_at date not null,
-  join_at date not null,
+  update_at TIMESTAMP not null,
+  join_at TIMESTAMP not null,
   user_image varchar(100),
   constraint unique_account unique (user_email, user_name)
 );
@@ -40,8 +40,8 @@ create table if not exists recipe (
   num_of_followers int not null, --number of user bookmarked this recipe (need?)
   num_of_rating int not null,
   num_of_comments int not null,
-  update_at date not null,
-  create_at date not null,
+  update_at TIMESTAMP not null,
+  create_at TIMESTAMP not null,
   recipe_image varchar(100)
 );
 
@@ -70,8 +70,8 @@ create table if not exists recipe_account_rating (
   rating NUMERIC(2, 1) not null,
   review varchar(300),
   review_recipe_image varchar(100),
-  update_at date not null,
-  create_at date not null,
+  update_at TIMESTAMP not null,
+  create_at TIMESTAMP not null,
   constraint pk_recipe_id_account_id_rating unique (recipe_id, account_id)
 );
 
@@ -87,7 +87,7 @@ create table if not exists recipe_account_comment (
   recipe_id int not null,
   account_id int not null,
   comment_content TEXT not null,
-  update_at date not null,
+  update_at TIMESTAMP not null,
   num_of_reply int not null,
   num_of_like int not null,
   parent_comment_id int
@@ -100,7 +100,7 @@ create table if not exists notification (
   notification_image varchar(50),
   on_click_type notification_type not null, --type of noti
   relevant_data int not null, --*
-  create_at date not null,
+  create_at TIMESTAMP not null,
   constraint pk_notification unique (title, notification_content)
 );
 -- người bạn theo dõi thêm recipe (relevant_data gửi id recipe),
@@ -111,7 +111,8 @@ create table if not exists notification (
 create table if not exists notification_to_account (
   notification_id int not null,
   account_id int not null,
-  is_seen int not null
+  is_seen int not null,
+  constraint pk_notification_to_account unique (notification_id, account_id)
 );
 
 create type notification_type as enum (

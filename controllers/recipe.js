@@ -168,6 +168,7 @@ async function createNewRecipe(req, res) {
             await db.query(ingredientRecipeQuery, [recipeId[0].id, ingredientId[0].id, ingredients[i].quantity]);
         }
 
+        //get firebase token for notification messaging
         const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token join subscription_account on firebase_messaging_token.account_id = subscription_account.follower_account_id where subscription_account.account_id = $1";
         const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [createdUserId]);
         const firebaseTokens = getFirebaseTokenResult.map((item) => {
@@ -275,6 +276,7 @@ async function rateRecipe(req, res) {
         const imageID = uuidv4();
         const fileName = imageID;
 
+        //check if user has rated this recipe before
         const checkRatingQuery = "select recipe_id from recipe_account_rating where recipe_id = $1 and account_id = $2"
         const existed = await db.query(checkRatingQuery, [recipeId, userId]);
         if (existed.length == 1) {
@@ -284,6 +286,8 @@ async function rateRecipe(req, res) {
             const insertRatingQuery = "insert into recipe_account_rating (recipe_id, account_id, rating, review, create_at, update_at) values ($1, $2, $3, $4, $5, $6)"
             await db.query(insertRatingQuery, [recipeId, userId, rating, review, currentDate, currentDate]);
         }
+
+        //get firebase token for notification messaging
         const getFirebaseTokenQuery = "select firebase_token from firebase_messaging_token join recipe on firebase_messaging_token.account_id = recipe.account_id  where recipe.id = $1";
         const getFirebaseTokenResult = await db.query(getFirebaseTokenQuery, [recipeId]);
         const firebaseTokens = getFirebaseTokenResult.map((item) => {

@@ -2,6 +2,6 @@ const express = require('express');
 const notificationController = require('../controllers/notification');
 const router = express.Router();
 
-// router.post("/registerUser", registerController.registerAccount);
+router.post("/getNotificationOfUser", notificationController.getNotificationOfUser);
 
 module.exports = router;

@@ -37,7 +37,7 @@ async function confirmEmail(req, res){
 
     res.status(200).json({mess: "success",  code : 200});
     } catch (error) {
-        res.status(401).json({mess: error + "\nPlease contact quocanhphan5301@gmail.com to report",  code : 401});
+        res.status(401).json({mess: error + "\nPlease contact a@gmail.com to report",  code : 401});
     }
 }
 
