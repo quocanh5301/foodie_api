@@ -10,17 +10,6 @@ firebaseAdmin.initializeApp({
 
 const bucket = firebaseAdmin.storage().bucket();
 
-const sendNotificationTo = async (deviceTokenList, title, content) => {
-  const message = {
-    data: { title: title, content: content },
-    tokens: deviceTokenList,
-  };
-  await firebaseAdmin.messaging().sendEachForMulticast(message)
-    .then((response) => {
-      console.log(response.successCount + ' messages were sent successfully');
-    });
-};
-
 const uploadFile = async ({ file, directory, fileName, onSuccess, onFail }) => {
   const fileBuffer = file.buffer;
   const fileUpload = bucket.file(`${directory}/${fileName}`); // Specify directory in the file path
@@ -41,9 +30,39 @@ const deleteFile = async ({ fileName, onSuccess, onFail }) => {
   await bucket.file(fileName).delete().then(onSuccess).catch(onFail);
 };
 
+const sendNotificationTo = async (deviceTokenList, title, content) => {
+  const message = {
+    data: { title: title, content: content },
+    tokens: deviceTokenList,
+  };
+  await firebaseAdmin.messaging().sendEachForMulticast(message)
+    .then((response) => {
+      console.log(response.successCount + ' messages were sent successfully');
+    });
+};
+
+const sendInAppNotification = async (deviceTokenList, title, content) => {
+  console.log(deviceTokenList);
+  console.log(title);
+  console.log(content);
+  const message = {
+    notification: { title: title, body: content  },
+    tokens: deviceTokenList,
+  };
+
+  try {
+    await firebaseAdmin.messaging().sendEachForMulticast(message)
+      .then((response) => {
+        console.log(response.successCount + ' messages were sent successfully');
+      });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = {
   sendNotificationTo: sendNotificationTo,
   uploadFile: uploadFile,
   deleteFile: deleteFile,
+  sendInAppNotification: sendInAppNotification,
 }

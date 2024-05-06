@@ -452,13 +452,13 @@ async function getReviewOnRecipe(req, res) {
 
 
 module.exports = {
-    getBookmarkList: getBookmarkList, //
+    getBookmarkList: getBookmarkList, 
     getRecipeDetail: getRecipeDetail,
-    getNewRecipe: getNewRecipe,//?
+    getNewRecipe: getNewRecipe,
     getTopRecipe: getTopRecipe,
     getRecipeOfUser: getRecipeOfUser,
-    createNewRecipe: createNewRecipe,//
-    bookmarkRecipe: bookmarkRecipe, //!qa unbookmark
+    createNewRecipe: createNewRecipe,
+    bookmarkRecipe: bookmarkRecipe,
     searchRecipeAndUser: searchRecipeAndUser,
     getPersonalRatingForRecipe: getPersonalRatingForRecipe,
     rateRecipe: rateRecipe,
