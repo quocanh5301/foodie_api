@@ -4,13 +4,13 @@ const Notification = require('../models/notification');
 
 async function getNotificationOfUser(req, res) {
     try {
-        // const userId = req.body.userId;
-        // const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1"
-        // const userNoti = await db.query(userNotiQuery, [userId]);
+        const userId = req.body.userId;
+        const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1"
+        const userNoti = await db.query(userNotiQuery, [userId]);
+        // console.log(new Notification(userNoti[0]));
         firebase.sendInAppNotification(
             ['dHDIIrH7RTiiGih_8xjjqL:APA91bFwwJuVeBp2MlKf3mnkknNTcOzgk3tzXOnObOLSf8UPUEwNDlkGjj9r0_7qwEteDCkhiAmRXgnSJ62ZcJN1BGylwyxzd-92wxyjq6iTGcThkteKNdu8tv77Sth9vVqw4cjqVy7H'],
-            'test title',
-            JSON.stringify(new Notification({ title: 'test title', content: 'test content' }))
+            JSON.stringify(userNoti[0])
         );
 
         res.status(200).json({ mess: "success", code: 200, data: new Notification({ title: 'test title', content: 'test content' }) });

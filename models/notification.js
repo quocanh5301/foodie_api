@@ -1,12 +1,11 @@
 module.exports = class Notification {
     constructor(data) {
+        this.id = data.id;
         this.title = data.title;
-        this.content = data.content;
-        // this.user_email = data.user_email;
-        // this.description = data.description;
-        // this.num_of_followers = data.num_of_followers;
-        // this.update_at = data.update_at;
-        // this.join_at = data.join_at;
-        // this.user_image = data.user_image;
+        this.notification_content = data.notification_content;
+        this.notification_image = data.notification_image;
+        this.on_click_type = data.on_click_type;
+        this.relevant_data = data.relevant_data;
+        this.create_at = data.create_at;
     }
 }

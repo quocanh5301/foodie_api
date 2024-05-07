@@ -41,18 +41,16 @@ const sendNotificationTo = async (deviceTokenList, title, content) => {
     });
 };
 
-const sendInAppNotification = async (deviceTokenList, title, content) => {
-  console.log(deviceTokenList);
-  console.log(title);
-  console.log(content);
+const sendInAppNotification = async (deviceTokenList, content) => {
   const message = {
-    notification: { title: title, body: content  },
+    notification: { body: content },
     tokens: deviceTokenList,
   };
 
   try {
     await firebaseAdmin.messaging().sendEachForMulticast(message)
       .then((response) => {
+        console.log(response.failureCount + ' messages were not sent');
         console.log(response.successCount + ' messages were sent successfully');
       });
   } catch (error) {
