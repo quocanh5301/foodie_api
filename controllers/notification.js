@@ -5,8 +5,10 @@ const firebase = require('../utils/firebase');
 async function getNotificationOfUser(req, res) {
     try {
         const userId = req.body.userId;
-        const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1 order by notification.create_at desc"
-        const userNoti = await db.query(userNotiQuery, [userId]);
+        const page = req.body.page;
+        const pageSize = req.body.pageSize;
+        const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1 order by notification.create_at desc limit $2 offset $3"
+        const userNoti = await db.query(userNotiQuery, [userId, pageSize, page * pageSize]);
         // console.log(new Notification(userNoti[0]));
 
         res.status(200).json({ mess: "success", code: 200, data: userNoti });

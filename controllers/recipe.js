@@ -447,8 +447,8 @@ async function searchRecipeAndUser(req, res) {
             }));
             return res.status(200).json({ mess: "success", code: 200, data: recipeWithImageUrl });
         } else {
-            const userSearchQuery = "select id, user_image, user_name, user_email from account where user_name ilike $1 order by id asc limit $2";
-            const userRows = await db.query(userSearchQuery, [`%${searchKey}%`, pageSize]);
+            const userSearchQuery = "select id, user_image, user_name, user_email from account where user_name ilike $1 order by id asc limit $2 offset $3";
+            const userRows = await db.query(userSearchQuery, [`%${searchKey}%`, pageSize, pageSize * page]);
             return res.status(200).json({ mess: "success", code: 200, data: userRows });
         }
     } catch (error) {
