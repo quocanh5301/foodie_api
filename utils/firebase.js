@@ -46,6 +46,7 @@ const sendInAppNotification = async (deviceTokenList, content) => {
     notification: { body: content },
     tokens: deviceTokenList,
   };
+  console.log(content);
 
   try {
     await firebaseAdmin.messaging().sendEachForMulticast(message)

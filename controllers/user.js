@@ -224,14 +224,6 @@ async function followUser(req, res) {
                 return item.firebase_token;
             });
             
-            //sent notification to followed user
-            if (firebaseTokens.length > 0) {
-                await firebase.sendNotificationTo(
-                    firebaseTokens,
-                    "New Follower !!!",
-                    "User " + followerUserName + " started following you :D",
-                );
-            }
             //insert notification
             const followNotiQuery = "INSERT INTO notification (title, notification_content, notification_image, on_click_type, relevant_data, create_at) values ($1,$2,$3,$4,$5,$6) on conflict (title, notification_content) do nothing;"
             await db.query(followNotiQuery, ["New Follower !!!", "User " + followerUserName + " started following you :D", followerUserImage, 'user', followerUserId, dateTime.currentDateDMY_HM()]);
@@ -240,6 +232,27 @@ async function followUser(req, res) {
             const notiId = await db.query(notiIdQuery, ["User " + followerUserName + " started following you :D", "New Follower !!!"]);
             const notiToAccountQuery = "INSERT INTO notification_to_account (notification_id, account_id, is_seen) values ($1,$2,$3);"
             await db.query(notiToAccountQuery, [notiId[0].id, userId, 0]);
+
+            //sent notification to followed user
+            if (firebaseTokens.length > 0) {
+                await firebase.sendNotificationTo(
+                    firebaseTokens,
+                    "New Follower !!!",
+                    "User " + followerUserName + " started following you :D",
+                );
+                await firebase.sendInAppNotification(
+                    firebaseTokens,
+                    JSON.stringify({
+                        id: notiId[0].id,
+                        title: "New Follower !!!",
+                        notification_content: "User " + followerUserName + " started following you :D",
+                        notification_image: followerUserImage,
+                        on_click_type: 'user',
+                        relevant_data: +followerUserId,
+                        create_at: new Date()
+                    })
+                );
+            }
 
             return res.status(200).json({ mess: "success", code: 200 });
         } else {

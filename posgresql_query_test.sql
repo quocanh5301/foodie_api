@@ -97,4 +97,4 @@ select * from recipe_account_rating where recipe_id = 19 order by create_at, upd
 
 select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = 7;
 
-
+select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = 7 order by notification.create_at desc

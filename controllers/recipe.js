@@ -1,3 +1,4 @@
+const e = require('express');
 const db = require('../data/db');
 const dateTime = require('../utils/date_time');
 const firebase = require('../utils/firebase');
@@ -201,10 +202,22 @@ async function createNewRecipe(req, res) {
                 directory: recipeDirectory,
                 onSuccess: async () => {
                     if (firebaseTokens.length > 0) {
-                        firebase.sendNotificationTo(
+                        await firebase.sendNotificationTo(
                             firebaseTokens,
                             "New recipe has been created",
                             "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                        );
+                        await firebase.sendInAppNotification(
+                            firebaseTokens,
+                            JSON.stringify({
+                                id: notiId[0].id,
+                                title: "New recipe has been created",
+                                notification_content: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                                notification_image: `${recipeDirectory}/${fileName}`,
+                                on_click_type: 'recipe',
+                                relevant_data: recipeId[0].id,
+                                create_at: new Date(),//? QA
+                            })
                         );
                     }
                     return res.status(200).json({ mess: "success", code: 200 });
@@ -214,11 +227,25 @@ async function createNewRecipe(req, res) {
                     try {
                         const queryStr = "delete from recipe WHERE recipe_image = $1 and account_id = $2"
                         await db.query(queryStr, [imageID, createdUserId]);
-                        await firebase.sendNotificationTo({
-                            firebaseTokens,
-                            title: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
-                            body: "New recipe has been created",
-                        });
+                        if (firebaseTokens.length > 0) {
+                            await firebase.sendNotificationTo(
+                                firebaseTokens,
+                                "New recipe has been created",
+                                "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                            );
+                            await firebase.sendInAppNotification(
+                                firebaseTokens,
+                                JSON.stringify({
+                                    id: notiId[0].id,
+                                    title: "New recipe has been created",
+                                    notification_content: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                                    notification_image: `${recipeDirectory}/${fileName}`,
+                                    on_click_type: 'recipe',
+                                    relevant_data: recipeId[0].id,
+                                    create_at: new Date(),//? QA
+                                })
+                            );
+                        }
                         return res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
                     } catch (error) {
                         return res.status(500).json({ mess: 'fail to insert recipe data, upload recipe image to firebase and removing wrong data' + err + 'and ' + error, code: 500 });
@@ -227,12 +254,28 @@ async function createNewRecipe(req, res) {
             });
         } else {
             try {
+                console.log("send in app noti " + firebaseTokens)
+                //!qa 8/5
                 //alter recipe image name if file is null
-                await firebase.sendNotificationTo(
-                    firebaseTokens,
-                    "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
-                    "New recipe has been created",
-                );
+                if (firebaseTokens.length > 0) {
+                    await firebase.sendNotificationTo(
+                        firebaseTokens,
+                        "New recipe has been created",
+                        "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                    );
+                    await firebase.sendInAppNotification(
+                        firebaseTokens,
+                        JSON.stringify({
+                            id: notiId[0].id,
+                            title: "New recipe has been created",
+                            notification_content: "New recipe " + recipeName + " has been created by " + userResult[0].user_name,
+                            notification_image: null,
+                            on_click_type: 'recipe',
+                            relevant_data: recipeId[0].id,
+                            create_at: new Date()
+                        })
+                    );
+                }
             } catch (error) {
                 console.log("error when send notification to " + firebaseTokens + " because " + error.message);
             }
@@ -270,7 +313,6 @@ async function rateRecipe(req, res) {
         const rating = req.body.rating;
         const review = req.body.review;
         const currentDate = dateTime.currentDateDMY_HM()
-        console.log(currentDate);
         const file = req.file;
 
         const imageID = uuidv4();
@@ -310,6 +352,7 @@ async function rateRecipe(req, res) {
         const notiToAccountQuery = "INSERT INTO notification_to_account (notification_id, account_id, is_seen) values ($1,$2,$3);"
         await db.query(notiToAccountQuery, [notiId[0].id, recipeName[0].account_id, 0]);
 
+
         if (file != null) {
             //insert review image name into table
             if (existed.length == 1) {
@@ -320,36 +363,63 @@ async function rateRecipe(req, res) {
                 await db.query(insertRatingQuery, [recipeId, userId, `${reviewDirectory}/${fileName}`]);
             }
 
+            if (firebaseTokens.length > 0) {
+                await firebase.sendNotificationTo(
+                    firebaseTokens,
+                    "New Rating !!!",
+                    "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
+                );
+                await firebase.sendInAppNotification(
+                    firebaseTokens,
+                    JSON.stringify({
+                        id: notiId[0].id,
+                        title: "New Rating !!!",
+                        notification_content: "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
+                        notification_image: `${reviewDirectory}/${fileName}`,
+                        on_click_type: 'recipe',
+                        relevant_data: +recipeId,
+                        create_at: new Date(),//? QA
+                    })
+                );
+            }
+
             //upload review image to firebase
             return await firebase.uploadFile({
                 file: file,
                 fileName: fileName,
                 directory: reviewDirectory,
-                onSuccess: async () => {
-                    if (firebaseTokens.length > 0) {
-                        await firebase.sendNotificationTo(
-                            firebaseTokens,
-                            "New Rating !!!",
-                            "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
-                        );
-                    }
-                    return res.status(200).json({ mess: "success", code: 200 });
-                },
+                onSuccess: async () => res.status(200).json({ mess: "success", code: 200 }),
                 onFail: async (err) => {
                     try {
                         const queryStr = "delete from recipe WHERE recipe_image = $1 and account_id = $2"
                         await db.query(queryStr, [imageID, createdUserId]);
-                        await firebase.sendNotificationTo(
-                            firebaseTokens,
-                            "New Rating !!!",
-                            "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + "with " + rating + " stars\nReview: " + review,
-                        );
                         return res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
                     } catch (error) {
                         return res.status(500).json({ mess: 'fail to insert recipe data, upload recipe image to firebase and removing wrong data' + err + 'and ' + error, code: 500 });
                     }
                 },
             });
+        } else {
+            if (firebaseTokens.length > 0) {
+                await firebase.sendNotificationTo(
+                    firebaseTokens,
+                    "New Rating !!!",
+                    "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + " with " + rating + " stars\nReview: " + review,
+                );
+                console.log("send in app noti " + firebaseTokens)
+                await firebase.sendInAppNotification(
+                    firebaseTokens,
+                    JSON.stringify({
+                        id: notiId[0].id,
+                        title: "New Rating !!!",
+                        notification_content: "User " + userName[0].user_name + " has rated your recipe " + recipeName[0].recipe_name + " with " + rating + "  stars\nReview: " + review,
+                        notification_image: null,
+                        on_click_type: 'recipe',
+                        relevant_data: +recipeId,
+                        create_at: new Date()
+                    })
+                );
+            }
         }
 
         return res.status(200).json({ mess: "success", code: 200 });
@@ -452,7 +522,7 @@ async function getReviewOnRecipe(req, res) {
 
 
 module.exports = {
-    getBookmarkList: getBookmarkList, 
+    getBookmarkList: getBookmarkList,
     getRecipeDetail: getRecipeDetail,
     getNewRecipe: getNewRecipe,
     getTopRecipe: getTopRecipe,

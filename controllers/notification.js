@@ -1,19 +1,15 @@
 const db = require('../data/db');
 const firebase = require('../utils/firebase');
-const Notification = require('../models/notification');
+// const Notification = require('../models/notification');
 
 async function getNotificationOfUser(req, res) {
     try {
         const userId = req.body.userId;
-        const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1"
+        const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1 order by notification.create_at desc"
         const userNoti = await db.query(userNotiQuery, [userId]);
         // console.log(new Notification(userNoti[0]));
-        firebase.sendInAppNotification(
-            ['dHDIIrH7RTiiGih_8xjjqL:APA91bFwwJuVeBp2MlKf3mnkknNTcOzgk3tzXOnObOLSf8UPUEwNDlkGjj9r0_7qwEteDCkhiAmRXgnSJ62ZcJN1BGylwyxzd-92wxyjq6iTGcThkteKNdu8tv77Sth9vVqw4cjqVy7H'],
-            JSON.stringify(userNoti[0])
-        );
 
-        res.status(200).json({ mess: "success", code: 200, data: new Notification({ title: 'test title', content: 'test content' }) });
+        res.status(200).json({ mess: "success", code: 200, data: userNoti });
     } catch (error) {
         res.status(401).json({ mess: error + " Please contact a@gmail.com to report", code: 401 });
     }
