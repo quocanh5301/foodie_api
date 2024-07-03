@@ -27,7 +27,12 @@ const uploadFile = async ({ file, directory, fileName, onSuccess, onFail }) => {
 };
 
 const deleteFile = async ({ fileName, onSuccess, onFail }) => {
-  await bucket.file(fileName).delete().then(onSuccess).catch(onFail);
+  try {
+    await bucket.file(fileName).delete().then(onSuccess).catch(onFail);
+  } catch (error) {
+    console.log(error);
+  }
+  
 };
 
 const sendNotificationTo = async (deviceTokenList, title, content) => {

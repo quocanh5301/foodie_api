@@ -519,7 +519,88 @@ async function getReviewOnRecipe(req, res) {
     }
 }
 
+async function removeRecipeOfUser(req, res) {
+    try {
+        const recipeId = req.body.recipeId;
+        // const recipeName = req.body.recipeName;
+        // const userId = req.body.userId;
+        const queryStr = "delete from recipe where id = $1"
+        await db.query(queryStr, [recipeId]);
+        return res.status(200).json({ mess: "success", code: 200 });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+}
 
+async function editRecipe(req, res) {
+    try {
+        const recipeId = req.body.recipeId;
+        const recipeName = req.body.recipeName
+        const recipeDescription = req.body.recipeDescription;
+        const recipeInstruction = req.body.recipeInstruction;
+
+        const file = req.file;
+
+        const imageID = uuidv4();
+        const fileName = imageID;
+
+        const currentDate = dateTime.currentDateDMY_HM()
+
+        //insert recipe info
+        const recipeQuery = "update recipe set recipe_name = $1, description = $2, instruction = $3, update_at = $4 where id = $5 RETURNING recipe_image;"
+        const recipeImage = await db.query(recipeQuery, [recipeName, recipeDescription, recipeInstruction, currentDate, recipeId]); //test/ is the folder name in Firebase Storage
+
+        if (file != null) {
+            //delete image in firebase
+            await firebase.deleteFile({
+                fileName: recipeImage[0].recipe_image, 
+                onSuccess: async () => {
+                    console.log("deleteFile success");
+                    return;
+                },
+                onFail: async (err) => {
+                    console.log("fail" + err);
+                    return;
+                },
+            });
+
+            //update image in firebase
+            return await firebase.uploadFile({
+                file: file,
+                fileName: fileName,
+                directory: recipeDirectory,
+                onSuccess: async () => {
+                    console.log("success");
+                    //set new image in database
+                    const deleteImageQuery = "update recipe set recipe_image = $1 where id = $2"
+                    await db.query(deleteImageQuery, [`${recipeDirectory}/${fileName}`, recipeId]);
+                    return res.status(200).json({ mess: "success", code: 200 });
+                },
+                onFail: async (err) => {
+                    console.log("fail" + err);
+                    return res.status(200).json({ mess: "success but upload image to firebase fail because" + err, code: 200 });
+                },
+            });
+        } else {
+            return res.status(200).json({ mess: "success", code: 200 });
+        }
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+
+    }
+}
+
+async function getRecipeNameInstructionDescription(req, res) {
+    try {
+        const recipeId = req.body.recipeId;
+        const queryStr = "select id, recipe_name, description, instruction from recipe where id = $1"
+        const rows = await db.query(queryStr, [recipeId]);
+        return res.status(200).json({ mess: "success", code: 200, data: rows[0] });
+    } catch (error) {
+        return res.status(500).json({ mess: error.message, code: 500 });
+    }
+
+}
 
 module.exports = {
     getBookmarkList: getBookmarkList,
@@ -534,4 +615,7 @@ module.exports = {
     rateRecipe: rateRecipe,
     getUserFollowingNewRecipe: getUserFollowingNewRecipe, //get recipe of users that followed by choosen user
     getReviewOnRecipe: getReviewOnRecipe,
+    removeRecipeOfUser: removeRecipeOfUser,
+    editRecipe: editRecipe,
+    getRecipeNameInstructionDescription: getRecipeNameInstructionDescription,
 }

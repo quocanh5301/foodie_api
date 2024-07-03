@@ -32,4 +32,10 @@ router.post("/getUserFollowingNewRecipe", recipeController.getUserFollowingNewRe
 
 router.post("/getReviewOnRecipe", recipeController.getReviewOnRecipe);
 
+router.post("/removeRecipeOfUser", recipeController.removeRecipeOfUser);
+
+router.post("/editRecipe",upload.single('recipeImage'), recipeController.editRecipe);
+
+router.post("/getRecipeNameInstructionDescription", recipeController.getRecipeNameInstructionDescription);
+
 module.exports = router;
