@@ -31,7 +31,13 @@ VALUES
   (7, 'Pasta Primavera', 'Vegetarian pasta dish', 'Cook pasta and toss with sautéed vegetables, olive oil, and Parmesan cheese. Season with salt and pepper to taste.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
   (8, 'Chicken Alfredo', 'Creamy chicken pasta recipe', 'Cook chicken until browned and cooked through. Stir in Alfredo sauce and cooked pasta. Simmer until heated through. Serve hot.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
   (9, 'Chocolate Chip Cookies', 'Classic cookie recipe', 'Cream butter and sugars. Add eggs and vanilla, then mix in flour and chocolate chips. Drop spoonfuls onto a baking sheet and bake until golden.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
-  (10, 'Guacamole', 'Fresh avocado dip', 'Mash ripe avocados with lime juice, salt, and minced garlic. Stir in diced tomatoes, onions, and cilantro. Serve with tortilla chips.', 0, 0, 0, 0,'2024-03-04', '2024-03-04');
+  (10, 'Guacamole', 'Fresh avocado dip', 'Mash ripe avocados with lime juice, salt, and minced garlic. Stir in diced tomatoes, onions, and cilantro. Serve with tortilla chips.', 0, 0, 0, 0,'2024-03-04', '2024-03-04'),
+  (10, 'Ratatouille', 'Classic French vegetable stew', 'Sauté onions, garlic, and bell peppers. Add tomatoes, zucchini, eggplant, and herbs. Simmer until vegetables are tender. Serve hot or cold.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (10, 'Butter Chicken', 'Delicious Indian butter chicken curry', 'Marinate chicken in yogurt and spices. Cook in a rich tomato and butter sauce. Serve with rice or naan bread.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (9, 'Beef Stroganoff', 'Rich and creamy beef stroganoff', 'Sauté beef strips with mushrooms and onions. Add sour cream and beef broth. Simmer until sauce thickens. Serve over cooked noodles.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (9, 'Shrimp Scampi', 'Classic shrimp scampi with garlic and lemon', 'Sauté shrimp in butter, garlic, and lemon juice. Serve over cooked pasta or with crusty bread.', 0, 0, 0, 0, '2024-03-04', '2024-03-04'),
+  (9, 'Beef Stir-Fry', 'Flavorful beef stir-fry with broccoli and bell peppers', 'Marinate beef strips with soy sauce and garlic. Stir-fry with broccoli and bell peppers until tender. Serve over rice.', 0, 0, 0, 0,'2024-03-04', '2024-03-04'),
+  (9, 'Vegetarian Chili', 'Hearty vegetarian chili packed with beans and vegetables', 'Simmer beans, tomatoes, and vegetables with chili spices until flavors meld. Serve hot with toppings like cheese and sour cream.', 0, 0, 0, 0, '2024-03-04', '2024-03-04');
 
  
  
@@ -39,10 +45,11 @@ VALUES
  -- Insert data into the recipe_account_rating table 7 recipe_id and 10 account_id
 INSERT INTO recipe_account_rating (recipe_id, account_id, rating, review, update_at, create_at) 
 VALUES 
-(14, 1, 5.0, 'great food', '2024-03-04', '2024-03-04'), (19, 2, 4.0, 'nice one', '2024-03-04', '2024-03-04'), (36, 3, 3.0, 'nice one', '2024-03-14', '2024-03-14'), (37, 4, 2.0, 'good recipe', '2024-03-15', '2024-03-15'), (38, 5, 1.0, 'easy recipe', '2024-03-16', '2024-03-16'),
-(39, 3, 5.0, 'easy recipe', '2024-03-03', '2024-03-03'), (15, 4, 4.0, 'fast recipe', '2024-03-03', '2024-03-03'), (20, 5, 3.0, 'good recipe', '2024-03-13', '2024-03-13'), (13, 6, 2.0, 'wow, delicious', '2024-03-07', '2024-03-07'), (18, 7, 1.0, 'fast recipe', '2024-03-02', '2024-03-02'),
-(34, 4, 3.0, 'good recipe', '2024-03-01', '2024-03-01'), (35, 5, 2.0, 'great food', '2024-03-01', '2024-03-01'), (26, 6, 1.0, 'nice one', '2024-03-05', '2024-03-05'), (27, 7, 5.0, 'easy recipe', '2024-03-06', '2024-03-06'), (28, 5, 1.0, 'wow, delicious', '2024-03-08', '2024-03-08'),
-(29, 6, 5.0, 'fast recipe', '2024-03-09', '2024-03-09'), (30, 7, 4.0, 'great food', '2024-03-10', '2024-03-10'), (33, 6, 4.0, 'easy recipe', '2024-03-11', '2024-03-11'), (24, 7, 3.0, 'good recipe', '2024-03-12', '2024-03-12');
+(14, 1, 5.0, 'great food', '2024-03-04', '2024-03-04'), (19, 2, 4.0, 'nice one', '2024-03-04', '2024-03-04'), (26, 3, 3.0, 'nice one', '2024-03-14', '2024-03-14'), (17, 4, 2.0, 'good recipe', '2024-03-15', '2024-03-15'), (2, 5, 1.0, 'easy recipe', '2024-03-16', '2024-03-16'),
+(1, 3, 5.0, 'easy recipe', '2024-03-03', '2024-03-03'), (1, 4, 4.0, 'fast recipe', '2024-03-03', '2024-03-03'), (20, 5, 3.0, 'good recipe', '2024-03-13', '2024-03-13'), (13, 6, 2.0, 'wow, delicious', '2024-03-07', '2024-03-07'), (18, 7, 1.0, 'fast recipe', '2024-03-02', '2024-03-02'),
+(1, 11, 3.0, 'good recipe', '2024-03-01', '2024-03-01'), (5, 5, 2.0, 'great food', '2024-03-01', '2024-03-01'), (6, 8, 1.0, 'nice one', '2024-03-05', '2024-03-05'), (7, 7, 5.0, 'easy recipe', '2024-03-06', '2024-03-06'), (8, 5, 1.0, 'wow, delicious', '2024-03-08', '2024-03-08'),
+(9, 6, 5.0, 'fast recipe', '2024-03-09', '2024-03-09'), (1, 7, 4.0, 'great food', '2024-03-10', '2024-03-10'), (3, 6, 4.0, 'easy recipe', '2024-03-11', '2024-03-11'), (24, 7, 3.0, 'good recipe', '2024-03-12', '2024-03-12'),(2, 10, 5.0, 'good recipe', '2024-03-12', '2024-03-12'),
+(1, 8, 5.0, 'easy recipe', '2024-03-03', '2024-03-03'), (1, 9, 5.0, 'fast recipe', '2024-03-03', '2024-03-03'), (1, 10, 5.0, 'good recipe', '2024-03-13', '2024-03-13'), (2, 8, 5.0, 'wow, delicious', '2024-03-07', '2024-03-07'), (2, 9, 5.0, 'fast recipe', '2024-03-02', '2024-03-02');
 
 -- Insert data into the ingredient table
 INSERT INTO ingredient (ingredient_name)
@@ -64,11 +71,11 @@ VALUES
   ('Milk');
  
  
-INSERT INTO firebase_messaging_token  (firebase_token, account_id) 
-VALUES 
-('fTshpZX1TRO2W49voXRH7V:APA91bEm4xxlRoU5VhUgw6I87xOo6E0Wga-Sn94OrmnUGA4ARkr_H5iYXphk0bfy0VpQV6ic89XwS3NBki9purV4DieEznaKTghU_FcM3lhdERtk8eR9MyUE-Pud4BOit-vCnrzdPN1f', 8), -- pixel 5
-('c9so6X7YSPKoPeWShDraJA:APA91bHtX91W2avS0J5Jr0rNCd0tslvGTOaZDUjjDcT4PQzCAhohEVjrTmqGaTu8qdp5btaozMOf3mT1WemxX9EH9nVqfsXSn9xfANztpE_gUc5Pz7Yntn5YFzn7NdUpB8u_4-Ml0Inx', 9), -- pixel 3
-('eStAFn1oQumhFbq5jKq2b4:APA91bEA_DMzlTVL6QBMtufI8LT6J_0Deftxzy-7uezp1L20zQ_zLwBgz7SywbpJq-rmMNJwi3Po3jExyaYSaYIFC7RuSbFQsFhdMUklC29I4t2-A8ZwyIeKpd9jMnKyjRFF2Bf8yYaL', 10); -- poco
+--INSERT INTO firebase_messaging_token  (firebase_token, account_id) 
+--VALUES 
+--('fTshpZX1TRO2W49voXRH7V:APA91bEm4xxlRoU5VhUgw6I87xOo6E0Wga-Sn94OrmnUGA4ARkr_H5iYXphk0bfy0VpQV6ic89XwS3NBki9purV4DieEznaKTghU_FcM3lhdERtk8eR9MyUE-Pud4BOit-vCnrzdPN1f', 8), -- pixel 5
+--('c9so6X7YSPKoPeWShDraJA:APA91bHtX91W2avS0J5Jr0rNCd0tslvGTOaZDUjjDcT4PQzCAhohEVjrTmqGaTu8qdp5btaozMOf3mT1WemxX9EH9nVqfsXSn9xfANztpE_gUc5Pz7Yntn5YFzn7NdUpB8u_4-Ml0Inx', 9), -- pixel 3
+--('eStAFn1oQumhFbq5jKq2b4:APA91bEA_DMzlTVL6QBMtufI8LT6J_0Deftxzy-7uezp1L20zQ_zLwBgz7SywbpJq-rmMNJwi3Po3jExyaYSaYIFC7RuSbFQsFhdMUklC29I4t2-A8ZwyIeKpd9jMnKyjRFF2Bf8yYaL', 10); -- poco
 
 
 -- Sample data for recipe_ingredient can be generated randomly based on existing recipes and ingredients.
@@ -85,7 +92,7 @@ LIMIT 35;
 -- Sample data for recipe_account_save can be generated randomly based on existing recipes and accounts.
 -- For example:
 INSERT INTO recipe_account_save (recipe_id, account_id)
-values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6), (3,11),(4,11),(5,11),(6,11),(7,11);
+values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6), (3,11),(4,11),(5,11),(6,11),(7,11),(1,8),(1,9),(1,10),(2,8),(2,9),(2,10);
 
 --INSERT INTO recipe_account_save (recipe_id, account_id)
 --values (3,11),(4,11),(5,11),(6,11),(7,11),(2,11),(8,11),(9,11),(10,11);
@@ -95,7 +102,7 @@ values (24,11);
 -- Inserting 17 rows
 INSERT INTO subscription_account (account_id, follower_account_id)
 values (1,2),(1,4),(1,5),(2,7),(2,3),(2,5),(2,6),(3,5),(4,6),(5,3),(5,1),(5,2),(5,4),(6,2),(6,5),(6,7),(7,6),
-(8,9),(8,10),(10,8),(10,9),(10,1);
+(8,9),(8,10),(10,8),(10,9),(10,1),(9,10),(9,8);
 
 
 -- Inserting 40 rows
@@ -140,7 +147,13 @@ VALUES
   (8, 2, 'Homemade Caesar salad dressing is the best.', '2024-04-06', NULL,0),
   (8, 3, 'Love this Caesar salad recipe!', '2024-04-07', 39,0),
   (8, 4, 'Perfect salad for any occasion.', '2024-04-08', 39,0),
-  (8, 5, 'Delicious and refreshing Caesar salad!', '2024-04-09', NULL,0);
+  (8, 5, 'Delicious and refreshing Caesar salad!', '2024-04-09', NULL,0),
+  (1, 8, 'This pancake recipe is amazing!', '2024-03-01', 1, 0),
+  (1, 9, 'Love this recipe! Easy to follow.', '2024-03-01', 1, 0),
+  (1, 10, 'My kids loved these pancakes!', '2024-03-01', 1, 0),
+  (2, 8, 'Scrambled eggs were perfect.', '2024-03-01', 1, 0),
+  (2, 9, 'Simple and delicious.', '2024-03-01', 1, 0),
+  (2, 10, 'Great breakfast option.', '2024-03-01', 1, 0);
 
 
 

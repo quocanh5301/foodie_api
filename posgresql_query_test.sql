@@ -14,6 +14,10 @@ select * from account_login_status;
 select * from notification;
 select * from notification_to_account;
 
+ALTER TABLE account 
+DROP CONSTRAINT unique_account_name;
+
+
 
  
 --get ingredients detail of "id" 'Pancakes'
@@ -33,7 +37,7 @@ VALUES
 (9, 'Vegetarian Chili', 'Hearty vegetarian chili packed with beans and vegetables', 'Simmer beans, tomatoes, and vegetables with chili spices until flavors meld. Serve hot with toppings like cheese and sour cream.', 0, 0, 0, 0, '2024-03-04', '2024-03-04', '');
 
 --
-SELECT ingredient_id, ingredient_name, ingredient_image, amount FROM recipe JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id JOIN ingredient ON recipe_ingredient.ingredient_id = ingredient.id where recipe.id = 2 ORDER BY ingredient_id ASC;
+--SELECT ingredient_id, ingredient_name, ingredient_image, amount FROM recipe JOIN recipe_ingredient ON recipe.id = recipe_ingredient.recipe_id JOIN ingredient ON recipe_ingredient.ingredient_id = ingredient.id where recipe.id = 2 ORDER BY ingredient_id ASC;
 
 --get bookmark recipe of user with id 5
 select * from recipe where id in (select recipe_id from recipe_account_save where account_id = 5) limit 2 offset 2;
@@ -42,18 +46,20 @@ insert into subscription_account (account_id, follower_account_id) values (11, 1
 
 update account set user_image = 'af8b0721-d35d-4265-968f-8447ae3atiqa.jpeg' where id = 11;
 
-update account set user_name  = 'golden boy' where id = 6; 
+update account set id  = 11 where id = 12; 
 
 select recipe_id from recipe_account_save where account_id = 5;
 
 update account set user_image = 'test/409109404_957680309062858_6882892167285190303_n.jpg', user_name = 'hehe' where user_name = 'JaneSmith';
 
-update recipe set recipe_image = null where id = 39;
+update recipe set recipe_image = null where id = 90;
 update firebase_messaging_token set firebase_token = 'eStAFn1oQumhFbq5jKq2b4:APA91bEA_DMzlTVL6QBMtufI8LT6J_0Deftxzy-7uezp1L20zQ_zLwBgz7SywbpJq-rmMNJwi3Po3jExyaYSaYIFC7RuSbFQsFhdMUklC29I4t2-A8ZwyIeKpd9jMnKyjRFF2Bf8yYaL' where account_id = 10;
 
 select * from (select * from recipe order by id desc) as sort_recipe ORDER BY ABS(EXTRACT(EPOCH FROM create_at - CURRENT_TIMESTAMP)) DESC limit 3 offset 0;
 
-delete from account  where id = 8;
+delete recipe_image from recipe where id = 90;
+
+
 
 
 select * from recipe where num_of_rating >= 4 and rating >= 3 order by (num_of_rating*rating) desc limit 45 offset 0;
@@ -85,6 +91,8 @@ create table if not exists recipe_account_rating (
   review varchar(300),
   constraint pk_recipe_id_account_id_rating unique (recipe_id, account_id)
 );
+
+select * from account_login_status; 
 
 select *  from recipe_account_comment where account_id = 4 group by id ;
 select id from recipe where account_id = 4;

@@ -9,7 +9,7 @@ async function getNotificationOfUser(req, res) {
         const pageSize = req.body.pageSize;
         const userNotiQuery = "select id, title, notification_content, notification_image, on_click_type, relevant_data, create_at, is_seen from notification join notification_to_account on notification.id = notification_to_account.notification_id where notification_to_account.account_id = $1 order by notification.create_at desc limit $2 offset $3"
         const userNoti = await db.query(userNotiQuery, [userId, pageSize, page * pageSize]);
-        console.log(userNoti[0]);
+        console.log("get user noti " + userNoti[0]);
         
 
         res.status(200).json({ mess: "success", code: 200, data: userNoti });

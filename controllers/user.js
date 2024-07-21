@@ -102,12 +102,17 @@ async function getReviewsOnUserRecipe(req, res) {
 
             const queryRecipeInfo = "SELECT recipe_name, recipe_image from recipe where id = $1"
             const recipeInfo = await db.query(queryRecipeInfo, [rating.recipe_id]);
-
+ 
+            // rating.update_at = new Date(rating.update_at).toISOString();
+            // rating.create_at = new Date(rating.create_at).toISOString();
+            // console.log(rating);//!qa
+            rating.rating = parseFloat(rating.rating);
             return { ...recipeInfo[0], ...userInfo[0], ...rating };
         }));
-
+        // console.log(ratingWithUserAndRecipeInfo);
         return res.status(200).json({ mess: "success", data: ratingWithUserAndRecipeInfo, code: 200 });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ mess: error.message, code: 500 });
     }
 }
